@@ -30,11 +30,27 @@ body {
   display: grid;
   grid-template-columns: repeat(var(--grid-cols), 1fr);
   grid-template-rows: repeat(var(--grid-rows), 1fr);
+
+  position: absolute;
+  top: 20%;
+  left: calc(50% - calc(min(var(--grid-max-size), var(--grid-width)) / 2));
 }
 
 .cell {
   border: 1px solid rgba(0, 0, 0, 0.672);
   background-color: transparent;
+}
+
+form {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+
+input[type="number"] {
+  width: 3rem;
+  text-align: center;
 }
 
 h1 {
@@ -46,7 +62,8 @@ h2 {
   font-weight: bold;
 }
 
-h3 {
+h3,
+legend {
   font-size: 1.17em;
   font-weight: bold;
 }

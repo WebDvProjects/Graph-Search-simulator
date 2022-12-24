@@ -21,7 +21,15 @@ const FormControl = (() => {
       rows = rowsInput.value;
       cols = colsInput.value;
 
-      // validate input
+      // real-time validation
+      if (
+        !customValidation(
+          input,
+          `${input.name} must be a number between ${input.min} and ${input.max}`
+        )
+      ) {
+        return;
+      }
 
       // set max value for start and target inputs
       setStartTargetMax(rows, cols);
@@ -31,27 +39,76 @@ const FormControl = (() => {
     });
   });
 
-  form.onsubmit = (e) => {
-    e.preventDefault();
-    // validate input
+  [rowsInput, colsInput, startCol, startRow, targetCol, targetRow].forEach(
+    (input) => {
+      input.addEventListener("input", () => {
+        // real-time validation
+        if (
+          !customValidation(
+            input,
+            `${input.name} must be a number between ${input.min} and ${input.max}`
+          )
+        ) {
+          return;
+        }
+      });
+    }
+  );
 
+  form.onsubmit = function (e) {
+    e.preventDefault();
+
+    // validate form in case user didn't use input
+    for (const input of [
+      rowsInput,
+      colsInput,
+      startCol,
+      startRow,
+      targetCol,
+      targetRow,
+    ]) {
+      if (!!!input.value) {
+        input.setCustomValidity("This field is required");
+        input.reportValidity();
+        console.log("invalid");
+        return;
+      } else {
+        input.setCustomValidity("");
+      }
+    }
+
+    console.log("submit");
     // perform search function
     const algo = document.querySelector(
       'input[name="algorithm"]:checked'
     ).value;
-    Search.search(algo, 0, 0);
+
+    Search.search(
+      algo,
+      [startRow.value, startCol.value],
+      [targetRow.value, targetCol.value]
+    );
   };
 
-  const validateInput = (input) => {
-    if (input.value < 1) {
-      input.value = 1;
-    } else if (input.value > 100) {
-      input.value = 100;
+  const customValidation = (input, msg) => {
+    if (
+      !!!input.value ||
+      input.validity.rangeUnderflow ||
+      input.validity.rangeOverflow ||
+      isNaN(input.value) ||
+      input.validity.badInput
+    ) {
+      input.setCustomValidity(msg);
+      input.reportValidity();
+      return false;
+    } else {
+      input.setCustomValidity("");
+      return true;
     }
   };
 
   const setStartTargetMax = (rows, cols) => {
-    console.log(rows, cols);
+    // console.log(rows, cols);
     startCol.max = cols;
     startRow.max = rows;
     targetCol.max = cols;
@@ -68,6 +125,12 @@ const GridSetup = (() => {
     for (let i = 0; i < width * height; i++) {
       const cell = document.createElement("div");
       cell.classList.add("cell");
+      // Record the position of each cell
+      const row = Math.floor(i / width);
+      const col = i % width;
+      cell.setAttribute("data-row", row);
+      cell.setAttribute("data-col", col);
+
       grid.appendChild(cell);
     }
   };
@@ -100,7 +163,88 @@ const Search = (() => {
     console.log("bfs");
   };
   const dfs = (start, end) => {
-    console.log("dfs");
+    console.log(start);
+
+    if (start[0] === end[0] && start[1] === end[1]) {
+      console.log("start is end");
+      return;
+    }
+
+    // Parse str to int
+    start = start.map((x) => parseInt(x));
+    end = end.map((x) => parseInt(x));
+
+    // DFS uses a stack
+    const stack = [];
+    // keep track of visited nodes
+    const visited = new Set();
+    // keep track of parent nodes
+    const parent = new Map();
+
+    // add start node to stack
+    stack.push(start);
+    // add start node to visited
+    visited.add(start);
+
+    while (stack.length > 0) {
+      // get the last node in the stack
+      const node = stack.pop();
+      // if node is the target node, we're done
+      if (node[0] === end[0] && node[1] === end[1]) {
+        console.log("found target");
+        // backtrack to get the path
+        const path = [];
+        let current = end;
+        while (current.toString() !== start.toString()) {
+          path.push(current);
+          current = parent.get(current);
+          console.log("in a while loop");
+        }
+        path.push(start);
+        path.reverse();
+        console.log(path);
+        return path;
+      }
+      // get the children of the current node
+      const children = neighbours(node);
+      // loop through children
+      for (const child of children) {
+        // if child is not visited
+        if (!visited.has(child)) {
+          // add child to visited
+          visited.add(child);
+          // add child to parent
+          parent.set(child, node);
+          // add child to stack
+          stack.push(child);
+        }
+      }
+    }
+    console.log("no path found");
+    return [];
+  };
+
+  //  Returns an array of neighbor nodes
+  const neighbours = (node) => {
+    const [row, col] = node;
+    const children = [];
+    // up
+    if (row > 0) {
+      children.push([row - 1, col]);
+    }
+    // down
+    if (row < rows - 1) {
+      children.push([row + 1, col]);
+    }
+    // left
+    if (col > 0) {
+      children.push([row, col - 1]);
+    }
+    // right
+    if (col < cols - 1) {
+      children.push([row, col + 1]);
+    }
+    return children;
   };
 
   return { search };
