@@ -10,5 +10,52 @@
 
     <title>Search Algorithms</title>
   </head>
-  <body></body>
+  <body>
+    <div class="container">
+      <h1>SELECT GRID SIZE</h1>
+      <form action="">
+        <input
+          type="number"
+          name="cols"
+          id="cols"
+          min="2"
+          max="50"
+          value="10"
+        />
+        <input
+          type="number"
+          name="rows"
+          id="rows"
+          min="2"
+          max="50"
+          value="10"
+        />
+        <fieldset class="algorithms">
+          <input type="radio" name="algorithm" id="dfs" value="dfs" checked />
+          <label for="dfs">DFS</label>
+          <input type="radio" name="algorithm" id="bfs" value="bfs" />
+          <label for="bfs">BFS</label>
+        </fieldset>
+
+        <fieldset class="start-pos">
+          <h3>Start Pos</h3>
+          <input type="number" name="cols" id="start-col" min="2" />
+          <input type="number" name="rows" id="start-row" min="2" />
+        </fieldset>
+
+        <fieldset class="target-pos">
+          <h3>Target Pos</h3>
+          <input type="number" name="cols" id="target-col" min="2" />
+          <input type="number" name="rows" id="target-row" min="2" />
+        </fieldset>
+
+        <button id="generate">START SEARCH</button>
+      </form>
+
+      <div class="search-container">
+        <h2>Search Algorithms</h2>
+        <div class="grid"></div>
+      </div>
+    </div>
+  </body>
 </html>
