@@ -183,12 +183,16 @@ const Search = (() => {
 
     // add start node to stack
     stack.push(start);
-    // add start node to visited
-    visited.add(start);
+    // add start node to visited (store as string for easy comparison)
+    visited.add(start.toString());
 
     while (stack.length > 0) {
       // get the last node in the stack
       const node = stack.pop();
+
+      // add node to visited
+      visited.add(node.toString());
+
       // if node is the target node, we're done
       if (node[0] === end[0] && node[1] === end[1]) {
         console.log("found target");
@@ -197,7 +201,7 @@ const Search = (() => {
         let current = end;
         while (current.toString() !== start.toString()) {
           path.push(current);
-          current = parent.get(current);
+          current = parent.get(current.toString());
           console.log("in a while loop");
         }
         path.push(start);
@@ -210,11 +214,9 @@ const Search = (() => {
       // loop through children
       for (const child of children) {
         // if child is not visited
-        if (!visited.has(child)) {
-          // add child to visited
-          visited.add(child);
+        if (!visited.has(child.toString())) {
           // add child to parent
-          parent.set(child, node);
+          parent.set(child.toString(), node);
           // add child to stack
           stack.push(child);
         }
