@@ -177,8 +177,11 @@ const GridSetup = (() => {
   return { createGrid, updateGrid, markCell, clearGrid };
 })();
 
-const Search = ((maxRows, maxCols) => {
-  const search = (algoType, start, end) => {
+const Search = (() => {
+  let speed = 50;
+
+  const search = (algoType, start, end, markSpeed = 50) => {
+    speed = Math.max(0, markSpeed);
     switch (algoType) {
       case "bfs":
         bfs(start, end);
@@ -191,7 +194,17 @@ const Search = ((maxRows, maxCols) => {
     }
   };
 
+  function counter() {
+    let count = 0;
+    return function () {
+      return count++;
+    };
+  }
+
   const bfs = (start, end) => {
+    // create a counter object
+    const bfsCounter = counter();
+
     // parse str to int
     start = start.map((x) => parseInt(x));
     end = end.map((x) => parseInt(x));
@@ -229,7 +242,9 @@ const Search = ((maxRows, maxCols) => {
 
       // add node to visited
       visited.add(node.toString());
-      GridSetup.markCell(node[0], node[1], "visited");
+      setTimeout(() => {
+        GridSetup.markCell(node[0], node[1], "visited");
+      }, bfsCounter() * speed);
 
       // check if node is end
       if (node[0] === end[0] && node[1] === end[1]) {
@@ -244,9 +259,11 @@ const Search = ((maxRows, maxCols) => {
         path.reverse();
 
         // mark path
-        path.forEach((node) => {
-          GridSetup.markCell(node[0], node[1], "path");
-        });
+        setTimeout(() => {
+          path.forEach((node) => {
+            GridSetup.markCell(node[0], node[1], "path");
+          });
+        }, bfsCounter() * speed);
         console.log(path, visited);
         return [path, visited];
       }
@@ -269,7 +286,8 @@ const Search = ((maxRows, maxCols) => {
   };
 
   const dfs = (start, end) => {
-    console.log(start);
+    // create a counter object
+    const dfsCounter = counter();
 
     if (start[0] === end[0] && start[1] === end[1]) {
       console.log("start is end");
@@ -306,7 +324,9 @@ const Search = ((maxRows, maxCols) => {
 
       // add node to visited
       visited.add(node.toString());
-      GridSetup.markCell(node[0], node[1], "visited");
+      setTimeout(() => {
+        GridSetup.markCell(node[0], node[1], "visited");
+      }, dfsCounter() * speed);
 
       // if node is the target node, we're done
       if (node[0] === end[0] && node[1] === end[1]) {
@@ -320,9 +340,11 @@ const Search = ((maxRows, maxCols) => {
         path.push(start);
         path.reverse();
         // mark path
-        path.forEach((node) => {
-          GridSetup.markCell(node[0], node[1], "path");
-        });
+        setTimeout(() => {
+          path.forEach((node) => {
+            GridSetup.markCell(node[0], node[1], "path");
+          });
+        }, dfsCounter() * speed);
 
         console.log(path, visited);
         return [path, visited];
@@ -354,7 +376,7 @@ const Search = ((maxRows, maxCols) => {
       children.push([row - 1, col]);
     }
     // down
-    if (row < maxRows - 1) {
+    if (row < rows - 1) {
       children.push([row + 1, col]);
     }
     // left
@@ -362,14 +384,14 @@ const Search = ((maxRows, maxCols) => {
       children.push([row, col - 1]);
     }
     // right
-    if (col < maxCols - 1) {
+    if (col < cols - 1) {
       children.push([row, col + 1]);
     }
     return children;
   };
 
   return { search };
-})(rows, cols);
+})();
 
 window.onload = () => {
   // create initial grid
