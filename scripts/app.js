@@ -70,19 +70,21 @@ const FormControl = (() => {
       if (!!!input.value) {
         input.setCustomValidity("This field is required");
         input.reportValidity();
-        console.log("invalid");
         return;
       } else {
         input.setCustomValidity("");
       }
     }
 
-    console.log("submit");
     // perform search function
     const algo = document.querySelector(
       'input[name="algorithm"]:checked'
     ).value;
 
+    // clear grid
+    GridSetup.clearGrid();
+
+    // perform search
     Search.search(
       algo,
       [startRow.value, startCol.value],
@@ -142,10 +144,40 @@ const GridSetup = (() => {
     createGrid(width, height);
   };
 
-  return { createGrid, updateGrid };
+  const markCell = (row, col, type) => {
+    const cell = document.querySelector(
+      `.cell[data-row="${row}"][data-col="${col}"]`
+    );
+
+    switch (type) {
+      case "start":
+        cell.classList.add("start");
+        break;
+      case "target":
+        cell.classList.add("target");
+        break;
+      case "visited":
+        cell.classList.add("visited");
+        break;
+      case "path":
+        cell.classList.add("path");
+        break;
+      default:
+        break;
+    }
+  };
+
+  const clearGrid = () => {
+    const cells = document.querySelectorAll(".cell");
+    cells.forEach((cell) => {
+      cell.classList.remove("start", "target", "visited", "path");
+    });
+  };
+
+  return { createGrid, updateGrid, markCell, clearGrid };
 })();
 
-const Search = (() => {
+const Search = ((maxRows, maxCols) => {
   const search = (algoType, start, end) => {
     switch (algoType) {
       case "bfs":
@@ -160,8 +192,82 @@ const Search = (() => {
   };
 
   const bfs = (start, end) => {
-    console.log("bfs");
+    // parse str to int
+    start = start.map((x) => parseInt(x));
+    end = end.map((x) => parseInt(x));
+
+    // mark start and target cells
+    GridSetup.markCell(start[0], start[1], "start");
+    GridSetup.markCell(end[0], end[1], "target");
+
+    // BFS uses a queue
+    const queue = [];
+    // keep track of visited nodes
+
+    // keep track of frontier nodes (nodes that are in the queue) to avoid adding them multiple times
+    // the other way around would be to mark nodes as visited when they are added to the queue
+    const frontier = new Set();
+
+    const visited = new Set();
+    // keep track of parent nodes
+    const parent = new Map();
+
+    // add start node to queue
+    queue.push(start);
+    frontier.add(start.toString());
+
+    while (queue.length > 0) {
+      // get the first node in the queue
+      const node = queue.shift();
+      frontier.delete(node.toString());
+
+      // check if node has been visited because it might have been added to the queue multiple times
+      // also we do not need to re-visit the node in BFS just in case
+      if (visited.has(node.toString())) {
+        continue;
+      }
+
+      // add node to visited
+      visited.add(node.toString());
+      GridSetup.markCell(node[0], node[1], "visited");
+
+      // check if node is end
+      if (node[0] === end[0] && node[1] === end[1]) {
+        // backtrack to get the path
+        const path = [];
+        let current = end;
+        while (current.toString() !== start.toString()) {
+          path.push(current);
+          current = parent.get(current.toString());
+        }
+        path.push(start);
+        path.reverse();
+
+        // mark path
+        path.forEach((node) => {
+          GridSetup.markCell(node[0], node[1], "path");
+        });
+        console.log(path, visited);
+        return [path, visited];
+      }
+
+      // get neighbors
+      const children = neighbours(node);
+      // add neighbors to queue
+      for (const child of children) {
+        if (!visited.has(child.toString()) && !frontier.has(child.toString())) {
+          queue.push(child);
+          frontier.add(child.toString());
+          // add neighbor to parents
+          parent.set(child.toString(), node);
+        }
+      }
+    }
+
+    // no path found
+    return [];
   };
+
   const dfs = (start, end) => {
     console.log(start);
 
@@ -174,8 +280,16 @@ const Search = (() => {
     start = start.map((x) => parseInt(x));
     end = end.map((x) => parseInt(x));
 
+    // mark start and target cells
+    GridSetup.markCell(start[0], start[1], "start");
+    GridSetup.markCell(end[0], end[1], "target");
+
     // DFS uses a stack
     const stack = [];
+
+    // frontier nodes (nodes that are in the stack) to avoid adding them multiple times
+    const frontier = new Set();
+
     // keep track of visited nodes
     const visited = new Set();
     // keep track of parent nodes
@@ -183,42 +297,47 @@ const Search = (() => {
 
     // add start node to stack
     stack.push(start);
-    // add start node to visited (store as string for easy comparison)
-    visited.add(start.toString());
+    frontier.add(start.toString());
 
     while (stack.length > 0) {
       // get the last node in the stack
       const node = stack.pop();
+      frontier.delete(node.toString());
 
       // add node to visited
       visited.add(node.toString());
+      GridSetup.markCell(node[0], node[1], "visited");
 
       // if node is the target node, we're done
       if (node[0] === end[0] && node[1] === end[1]) {
-        console.log("found target");
         // backtrack to get the path
         const path = [];
         let current = end;
         while (current.toString() !== start.toString()) {
           path.push(current);
           current = parent.get(current.toString());
-          console.log("in a while loop");
         }
         path.push(start);
         path.reverse();
-        console.log(path);
-        return path;
+        // mark path
+        path.forEach((node) => {
+          GridSetup.markCell(node[0], node[1], "path");
+        });
+
+        console.log(path, visited);
+        return [path, visited];
       }
       // get the children of the current node
       const children = neighbours(node);
       // loop through children
       for (const child of children) {
         // if child is not visited
-        if (!visited.has(child.toString())) {
+        if (!visited.has(child.toString()) && !frontier.has(child.toString())) {
           // add child to parent
           parent.set(child.toString(), node);
           // add child to stack
           stack.push(child);
+          frontier.add(child.toString());
         }
       }
     }
@@ -235,7 +354,7 @@ const Search = (() => {
       children.push([row - 1, col]);
     }
     // down
-    if (row < rows - 1) {
+    if (row < maxRows - 1) {
       children.push([row + 1, col]);
     }
     // left
@@ -243,14 +362,14 @@ const Search = (() => {
       children.push([row, col - 1]);
     }
     // right
-    if (col < cols - 1) {
+    if (col < maxCols - 1) {
       children.push([row, col + 1]);
     }
     return children;
   };
 
   return { search };
-})();
+})(rows, cols);
 
 window.onload = () => {
   // create initial grid
