@@ -3,7 +3,11 @@ const form = document.querySelector("form");
 const rowsInput = document.querySelector("#rows");
 const colsInput = document.querySelector("#cols");
 const submitBtn = document.querySelector("#generate");
-// const algorithms = document.getElementsByName("algorithm");
+const stopBtn = document.querySelector("#stop-generate");
+
+stopBtn.addEventListener("click", () => {
+  Search.clearTimeOuts();
+});
 
 let cols = rowsInput.value;
 let rows = colsInput.value;
@@ -169,6 +173,9 @@ const GridSetup = (() => {
   };
 
   const clearGrid = () => {
+    // clear any timeouts from serch functions
+    Search.clearTimeOuts();
+
     const cells = document.querySelectorAll(".cell");
     cells.forEach((cell) => {
       cell.classList.remove("start", "target", "visited", "path");
@@ -183,8 +190,12 @@ const Search = (() => {
   const visitsDisplay = document.querySelector("#visits");
   const pathSizeDisplay = document.querySelector("#path-size");
   let speed = 50;
+  let timeOutExecutionIds = new Set();
 
   const search = (algoType, start, end, markSpeed = 50) => {
+    // clear any current executions timeouts
+    clearTimeOuts();
+
     // parse str to int
     start = start.map((x) => parseInt(x));
     end = end.map((x) => parseInt(x));
@@ -209,11 +220,27 @@ const Search = (() => {
     }
   };
 
-  function counter() {
-    let count = 0;
-    return function () {
-      return count++;
-    };
+  function counter(linear = true, countStart = 0) {
+    let count = countStart;
+
+    if (linear) {
+      // return a function that increments count
+      return function () {
+        return count++;
+      };
+    } else {
+      // return a function that decrements count
+      return function () {
+        return count--;
+      };
+    }
+  }
+
+  function clearTimeOuts() {
+    for (let id of timeOutExecutionIds) {
+      clearTimeout(id);
+      timeOutExecutionIds.delete(id);
+    }
   }
 
   function showResults(path, visited) {
@@ -227,17 +254,39 @@ const Search = (() => {
   }
 
   const iteration = (start, end) => {
-    // create a counter object
-    const iterationCounter = counter();
-
     // mark start and target cells
     GridSetup.markCell(start[0], start[1], "start");
     GridSetup.markCell(end[0], end[1], "target");
 
+    {
+      // Reverse Iteration (Just incase but not necessary)
+      // //  check if start is ahead or behind target
+      // const isStartBehindTarget = (() => {
+      //   return (
+      //     (start[0] + 1) * (start[1] + 1) - 1 < (end[0] + 1) * (end[1] + 1) - 1
+      //   );
+      // })();
+      // let iterationCounter = null;
+      // if (!isStartBehindTarget) {
+      //   // if start is ahead of target, swap them
+      //   [start, end] = [end, start];
+      //   // initiate a reverse counter (counter starts from endIndex)
+      //   iterationCounter = counter(false, end[0] * cols + end[1]);
+      // } else {
+      //   // initiate a linear counter
+      //   iterationCounter = counter();
+      // }
+    }
+
+    // initiate a linear counter
+    const iterationCounter = counter();
+
     const path = [];
 
+    const startIndex = start[0] * cols + start[1];
+    const endIndex = end[0] * cols + end[1];
     // Loop through all cells
-    for (let i = 0; i < rows * cols; i++) {
+    for (let i = startIndex; i < rows * cols; i++) {
       const row = Math.floor(i / cols);
       const col = i % cols;
 
@@ -245,17 +294,21 @@ const Search = (() => {
       path.push([row, col]);
 
       // mark visited cells
-      setTimeout(() => {
-        GridSetup.markCell(row, col, "visited");
-      }, speed * iterationCounter());
-
-      if (row === end[0] && col === end[1]) {
-        // mark path
+      timeOutExecutionIds.add(
         setTimeout(() => {
-          path.forEach((node) => {
-            GridSetup.markCell(node[0], node[1], "path");
-          });
-        }, speed * iterationCounter());
+          GridSetup.markCell(row, col, "visited");
+        }, speed * iterationCounter())
+      );
+
+      if (i === endIndex) {
+        // mark path
+        timeOutExecutionIds.add(
+          setTimeout(() => {
+            path.forEach((node) => {
+              GridSetup.markCell(node[0], node[1], "path");
+            });
+          }, speed * iterationCounter())
+        );
 
         // show results
         showResults(path, path.length);
@@ -264,6 +317,8 @@ const Search = (() => {
     }
 
     // path not found
+    showResults([], path.length);
+    console.log("Path not found");
     return [];
   };
 
@@ -304,9 +359,11 @@ const Search = (() => {
 
       // add node to visited
       visited.add(node.toString());
-      setTimeout(() => {
-        GridSetup.markCell(node[0], node[1], "visited");
-      }, bfsCounter() * speed);
+      timeOutExecutionIds.add(
+        setTimeout(() => {
+          GridSetup.markCell(node[0], node[1], "visited");
+        }, bfsCounter() * speed)
+      );
 
       // check if node is end
       if (node[0] === end[0] && node[1] === end[1]) {
@@ -321,11 +378,13 @@ const Search = (() => {
         path.reverse();
 
         // mark path
-        setTimeout(() => {
-          path.forEach((node) => {
-            GridSetup.markCell(node[0], node[1], "path");
-          });
-        }, bfsCounter() * speed);
+        timeOutExecutionIds.add(
+          setTimeout(() => {
+            path.forEach((node) => {
+              GridSetup.markCell(node[0], node[1], "path");
+            });
+          }, bfsCounter() * speed)
+        );
         // console.log(path, visited);
         showResults(path, visited.size);
         return [path, visited];
@@ -383,9 +442,11 @@ const Search = (() => {
 
       // add node to visited
       visited.add(node.toString());
-      setTimeout(() => {
-        GridSetup.markCell(node[0], node[1], "visited");
-      }, dfsCounter() * speed);
+      timeOutExecutionIds.add(
+        setTimeout(() => {
+          GridSetup.markCell(node[0], node[1], "visited");
+        }, dfsCounter() * speed)
+      );
 
       // if node is the target node, we're done
       if (node[0] === end[0] && node[1] === end[1]) {
@@ -399,11 +460,13 @@ const Search = (() => {
         path.push(start);
         path.reverse();
         // mark path
-        setTimeout(() => {
-          path.forEach((node) => {
-            GridSetup.markCell(node[0], node[1], "path");
-          });
-        }, dfsCounter() * speed);
+        timeOutExecutionIds.add(
+          setTimeout(() => {
+            path.forEach((node) => {
+              GridSetup.markCell(node[0], node[1], "path");
+            });
+          }, dfsCounter() * speed)
+        );
 
         // console.log(path, visited);
         showResults(path, visited.size);
@@ -454,7 +517,7 @@ const Search = (() => {
     return children;
   };
 
-  return { search, clearResults };
+  return { search, clearResults, clearTimeOuts };
 })();
 
 window.onload = () => {
