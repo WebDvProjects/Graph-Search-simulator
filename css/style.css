@@ -31,6 +31,7 @@ body {
   position: absolute;
   top: 20%;
   left: calc(50% - calc(min(var(--grid-max-size), var(--grid-width)) / 2));
+  z-index: 5;
 }
 
 .grid {
@@ -72,7 +73,7 @@ body {
   color: white;
   font-size: 1rem;
   font-weight: bold;
-  z-index: 100;
+  z-index: 1;
 }
 
 #results-container p {
@@ -113,7 +114,7 @@ body {
   align-items: center;
 
   border-radius: 0.5rem;
-  z-index: 20;
+  z-index: 2;
 }
 
 .cell:hover::after {
@@ -215,34 +216,16 @@ input[type="number"] {
   flex-direction: column;
 }
 
-@media only screen and (max-width: 690px) {
-  form {
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    align-items: center;
-    justify-items: center;
-  }
-
-  .grid {
-    top: 35%;
-  }
-
-  .grid-size,
-  .start-end-pos {
-    justify-self: start;
-  }
-
-  .algorithms,
-  .buttons {
-    justify-self: end;
-  }
-}
-
 .control-buttons {
   display: flex;
+  margin-left: 5%;
+  flex-direction: column;
   /* justify-content: space-between; */
-  align-items: center;
+  align-items: start;
   gap: 1rem;
+
+  position: relative;
+  top: 5%;
 }
 
 .control-buttons button {
@@ -252,6 +235,7 @@ input[type="number"] {
   border-radius: 0.5rem;
   font-weight: bold;
   cursor: pointer;
+  width: 90px;
   padding: 0.5rem 1rem;
 }
 
@@ -299,4 +283,42 @@ legend {
 
 .hidden {
   display: none !important;
+}
+
+@media only screen and (max-width: 690px) {
+  form {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: center;
+    justify-items: center;
+  }
+
+  .grid {
+    top: 35%;
+  }
+
+  #results-container {
+    top: 7%;
+  }
+
+  .grid-size,
+  .start-end-pos {
+    justify-self: start;
+  }
+
+  .algorithms,
+  .buttons {
+    justify-self: end;
+  }
+
+  .control-buttons {
+    flex-direction: row;
+    top: 0;
+  }
+
+  .control-buttons button {
+    height: 30px;
+    font-size: 0.5rem;
+    width: 110px;
+  }
 }

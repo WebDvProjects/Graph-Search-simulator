@@ -22,6 +22,7 @@ clearWallsBtn.addEventListener("click", () => {
 
 // clears the whole grid
 clearBtn.addEventListener("click", () => {
+  GridSetup.clearWalls();
   GridSetup.clearGrid();
 });
 
@@ -202,14 +203,25 @@ const GridSetup = (() => {
       cell.style.setProperty("--row-pos", row);
       cell.style.setProperty("--col-pos", col);
 
-      // add event listener that allows to select the start and end nodes
+      /* 
+      An event listener that allows users to select the start and end nodes by clicking on the grid
+      The first click will set the cell as start and the second click will set the cell as target
+      clicking the respective node again will unselect it
+      */
       cell.addEventListener("click", (e) => {
         // if we are drawing walls then don't allow to select start and end nodes
         if (toggleDrawing.classList.contains("active")) return;
 
-        // set cell as target if shift key is pressed while clicking
+        // set cell as start when touch
         // can unselect by clicking again
-        if (e.shiftKey) {
+        const selectedStarts = document.querySelectorAll(".start");
+
+        // check if there is already a start selected and if the cell is not the same as the selected start
+        if (
+          (selectedStarts.length > 0 &&
+            !!![...selectedStarts].find((start) => cell === start)) ||
+          cell.classList.contains("target")
+        ) {
           const selectedTargets = document.querySelectorAll(".target");
           // check if there is already a target selected and if the cell is not the same as the selected target
           if (
@@ -222,18 +234,49 @@ const GridSetup = (() => {
           // toggle target class
           cell.classList.toggle("target");
           FormControl.setPositions("target");
-        } else {
-          const selectedStarts = document.querySelectorAll(".start");
+
+          return;
+        }
+        cell.classList.toggle("start");
+        FormControl.setPositions("start");
+      });
+
+      /* 
+      An event listener that allows mobile users to select the start and end nodes by tapping
+      The first click will set the cell as start and the second click will set the cell as target
+      clicking the respective node again will unselect it
+      */
+      cell.addEventListener("touchend", (e) => {
+        // if we are drawing walls then don't allow to select start and end nodes
+        if (toggleDrawing.classList.contains("active")) return;
+
+        // set cell as start when touch
+        // can unselect by clicking again
+        const selectedStarts = document.querySelectorAll(".start");
+
+        // check if there is already a start selected and if the cell is not the same as the selected start
+        if (
+          (selectedStarts.length > 0 &&
+            !!![...selectedStarts].find((start) => cell === start)) ||
+          cell.classList.contains("target")
+        ) {
+          const selectedTargets = document.querySelectorAll(".target");
+          // check if there is already a target selected and if the cell is not the same as the selected target
           if (
-            (selectedStarts.length > 0 &&
-              !!![...selectedStarts].find((start) => cell === start)) ||
-            cell.classList.contains("target")
+            (selectedTargets.length > 0 &&
+              !!![...selectedTargets].find((target) => cell === target)) ||
+            cell.classList.contains("start")
           ) {
             return;
           }
-          cell.classList.toggle("start");
-          FormControl.setPositions("start");
+          // toggle target class
+          cell.classList.toggle("target");
+          FormControl.setPositions("target");
+
+          return;
         }
+        cell.classList.toggle("start");
+        FormControl.setPositions("start");
       });
 
       // add an event listener to allow users to draw walls
@@ -245,6 +288,7 @@ const GridSetup = (() => {
         }
       });
 
+      // When user is holding the mouse then allow drawing
       cell.addEventListener("mouseenter", (e) => {
         if (toggleDrawing.classList.contains("active") && drawing) {
           // toggle wall class
@@ -252,6 +296,7 @@ const GridSetup = (() => {
         }
       });
 
+      // Event to allow users to draw walls on mobile browser
       cell.addEventListener("touchstart", (e) => {
         e.preventDefault();
         if (toggleDrawing.classList.contains("active")) {
@@ -261,6 +306,7 @@ const GridSetup = (() => {
         }
       });
 
+      // Event to simulate dragging/drawing on mobile browser
       cell.addEventListener("touchmove", (e) => {
         e.preventDefault();
         // get the touch element and current touch position
@@ -281,6 +327,7 @@ const GridSetup = (() => {
         }
       });
 
+      // Event to prevent cells from being dragged on the grid
       cell.addEventListener("dragstart", (e) => {
         e.preventDefault();
       });
@@ -338,14 +385,7 @@ const GridSetup = (() => {
 
     const cells = document.querySelectorAll(".cell");
     cells.forEach((cell) => {
-      cell.classList.remove(
-        "start",
-        "target",
-        "visited",
-        "path",
-        "frontier",
-        "wall"
-      );
+      cell.classList.remove("start", "target", "visited", "path", "frontier");
     });
   };
 
