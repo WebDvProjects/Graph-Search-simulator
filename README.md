@@ -2,7 +2,7 @@
 
 A web application that simulates the various graph search algorithms on a grid. This has always been a project I wanted to work on even before getting farmiliar with web development as I am a visual learner and figured such project would help to give insight in some algorithm concepts.
 
-[Live]()
+[Live](https://webdvprojects.github.io/Graph-Search-simulator/)
 
 ## Features
 
