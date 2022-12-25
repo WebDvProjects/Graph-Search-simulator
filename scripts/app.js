@@ -491,8 +491,125 @@ const Search = (() => {
   };
 
   const dijkstra = (start, end) => {
-    console.log("Not implemented yet");
+    // mark start and target cells
+    GridSetup.markCell(start[0], start[1], "start");
+    GridSetup.markCell(end[0], end[1], "target");
+
+    // create a counter object
+    const dijkstraCounter = counter();
+
+    const visited = new Set();
+    const parent = new Map();
+
+    // create a priority queue
+    const queue = new DataStructures.PriorityQueue();
+
+    // add start node to queue
+    queue.enqueue(start, 0 + heuristic(start, end));
+
+    // keep track of the distance from the start node to each node
+    const frontier = new Map();
+    frontier.set(start.toString(), 0);
+
+    while (queue.size() > 0) {
+      const node = queue.dequeue().value;
+      const nodeDistance = frontier.get(node.toString());
+      frontier.delete(node.toString());
+
+      // add node to visited
+      visited.add(node.toString());
+      timeOutExecutionIds.add(
+        setTimeout(() => {
+          GridSetup.markCell(node[0], node[1], "visited");
+        }, dijkstraCounter() * speed)
+      );
+
+      // check if node is end
+      if (node[0] === end[0] && node[1] === end[1]) {
+        // backtrack to get the path
+        const path = [];
+        let current = end;
+        while (current.toString() !== start.toString()) {
+          path.push(current);
+          current = parent.get(current.toString());
+        }
+        path.push(start);
+        path.reverse();
+        // mark path
+        timeOutExecutionIds.add(
+          setTimeout(() => {
+            path.forEach((node) => {
+              GridSetup.markCell(node[0], node[1], "path");
+            });
+          }, dijkstraCounter() * speed)
+        );
+
+        // console.log(path, visited);
+        showResults(path, visited.size);
+        return [path, visited];
+      }
+
+      // get neighbors
+      const children = neighbours(node);
+      // loop through neighbors
+      for (const child of children) {
+        // calculate the distance from the start node to the child
+        const newDistance = nodeDistance + 1;
+
+        // if child is not visited and not in the queue
+        if (!visited.has(child.toString()) && !frontier.has(child.toString())) {
+          // update the distance to the child
+          frontier.set(child.toString(), newDistance);
+          // add child to parent
+          parent.set(child.toString(), node);
+          // add child to queue
+          queue.enqueue(child, newDistance + heuristic(child, end));
+        }
+        // Otherwise if child is in the queue and the new distance is less than the old distance
+        else if (
+          frontier.has(child.toString()) &&
+          frontier.get(child.toString()) > newDistance
+        ) {
+          // update the distance to the child
+          frontier.set(child.toString(), newDistance);
+          // add child to parent
+          parent.set(child.toString(), node);
+
+          // delete child with old distance from queue
+          queue.delete(child.toString());
+
+          // add child to queue with updated distance (replace old child with new child)
+          queue.enqueue(
+            child,
+            frontier.get(child.toString()) + heuristic(child, end)
+          );
+        }
+      }
+    }
+
+    console.log("no path found");
+    showResults([], visited.size);
+    return [];
   };
+
+  // heuristic function
+  function heuristic(a, b) {
+    // Manhattan distance
+    return manhattanDistance(a, b);
+
+    // Euclidean distance
+    // return euclideanDistance(a, b);
+  }
+
+  // find the manhattan distance between two nodes (this is our heuristic function)
+  function manhattanDistance(a, b) {
+    return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
+  }
+
+  // find the euclidean distance between two nodes (this is our heuristic function)
+  function euclideanDistance(a, b) {
+    return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
+  }
 
   //  Returns an array of neighbor nodes
   const neighbours = (node) => {
@@ -518,6 +635,38 @@ const Search = (() => {
   };
 
   return { search, clearResults, clearTimeOuts };
+})();
+
+const DataStructures = (() => {
+  // Priority Queue
+  class PriorityQueue {
+    constructor() {
+      this.values = [];
+    }
+    // add to queue and sort
+    enqueue(value, priority) {
+      this.values.push({ value, priority });
+      this.sort();
+    }
+    dequeue() {
+      return this.values.shift();
+    }
+    sort() {
+      this.values.sort((a, b) => a.priority - b.priority);
+    }
+
+    delete(value) {
+      this.values = this.values.filter(
+        (node) => node.value.toString() !== value
+      );
+      this.sort();
+    }
+
+    size() {
+      return this.values.length;
+    }
+  }
+  return { PriorityQueue };
 })();
 
 window.onload = () => {

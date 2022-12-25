@@ -1,8 +1,9 @@
 THINGS TO FIX:
-min and max coordinated (0-inclusive or exclusive?)
 
 TODO:
 Improve UI
 Add Key
 User pick start and end positions by clicking on grid
 Add other algorithms or variants (Traditional Iteration, Djikstra's shortest path)
+Skip to end button (The idea is to stop clearGrid (which also stops all timeouts) then re-execute the function without timeouts)
+pause and play buttons
