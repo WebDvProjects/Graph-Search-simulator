@@ -8,6 +8,13 @@
     <link rel="stylesheet" href="css/style.css" />
     <script src="scripts/app.js" defer></script>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,400;0,500;0,900;1,200;1,400;1,800;1,900&family=Lato:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Zilla+Slab:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600;1,700&display=swap"
+      rel="stylesheet"
+    />
+
     <title>Search Algorithms</title>
   </head>
   <body>
@@ -38,23 +45,64 @@
 
         <fieldset class="algorithms">
           <legend>Algorithms</legend>
+          <label for="iteration">
+            <input type="radio" name="algorithm" id="iteration" value="iter" />
+            Iteration
+          </label>
+          <label for="dfs">
+            <input type="radio" name="algorithm" id="dfs" value="dfs" />
+            DFS
+          </label>
+          <label for="bfs">
+            <input type="radio" name="algorithm" id="bfs" value="bfs" checked />
+            BFS
+          </label>
+          <label for="dijkstra">
+            <input
+              type="radio"
+              name="algorithm"
+              id="dijkstra"
+              value="dijkstra"
+            />
+            Dijkstra
+          </label>
+          <!-- <input type="radio" name="algorithm" id="iteration" value="iter" />
+          <label for="iteration">Iteration</label>
           <input type="radio" name="algorithm" id="dfs" value="dfs" />
           <label for="dfs">DFS</label>
           <input type="radio" name="algorithm" id="bfs" value="bfs" checked />
           <label for="bfs">BFS</label>
+          <input type="radio" name="algorithm" id="dijkstra" value="dijkstra" />
+          <label for="dijkstra">Dijkstra</label> -->
         </fieldset>
 
         <section class="start-end-pos">
           <section class="start-pos">
             <h3>Start Pos</h3>
-            <input type="number" name="cols" id="start-col" min="0" />
-            <input type="number" name="rows" id="start-row" min="0" />
+            <div class="pos-wrapper">
+              <label for="start-row">
+                <p>Row</p>
+                <input type="number" name="rows" id="start-row" min="0" />
+              </label>
+              <label for="start-col">
+                <p>Col</p>
+                <input type="number" name="cols" id="start-col" min="0" />
+              </label>
+            </div>
           </section>
 
           <section class="target-pos">
             <h3>Target Pos</h3>
-            <input type="number" name="cols" id="target-col" min="0" />
-            <input type="number" name="rows" id="target-row" min="0" />
+            <div class="pos-wrapper">
+              <label for="target-row">
+                <p>Row</p>
+                <input type="number" name="rows" id="target-row" min="0" />
+              </label>
+              <label for="target-col">
+                <p>Col</p>
+                <input type="number" name="cols" id="target-col" min="0" />
+              </label>
+            </div>
           </section>
         </section>
 
@@ -63,7 +111,17 @@
 
       <div class="search-container">
         <!-- <h2>Search Algorithms</h2> -->
-        <div class="grid"></div>
+        <div class="grid-wrapper">
+          <div class="grid"></div>
+        </div>
+
+        <div class="hidden" id="results-container">
+          <h2>Path Results</h2>
+          <!-- <br /> -->
+          <p>Visits: <span id="visits"></span></p>
+          <br />
+          <p>Path Length: <span id="path-size"></span></p>
+        </div>
       </div>
     </div>
   </body>

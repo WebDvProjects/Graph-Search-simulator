@@ -77,12 +77,13 @@ const FormControl = (() => {
     }
 
     // perform search function
-    const algo = document.querySelector(
-      'input[name="algorithm"]:checked'
-    ).value;
+    const algo = document.querySelector('input[name="algorithm"]:checked').id;
 
     // clear grid
     GridSetup.clearGrid();
+
+    // clear results
+    Search.clearResults();
 
     // perform search
     Search.search(
@@ -111,10 +112,10 @@ const FormControl = (() => {
 
   const setStartTargetMax = (rows, cols) => {
     // console.log(rows, cols);
-    startCol.max = cols;
-    startRow.max = rows;
-    targetCol.max = cols;
-    targetRow.max = rows;
+    startCol.max = cols - 1;
+    startRow.max = rows - 1;
+    targetCol.max = cols - 1;
+    targetRow.max = rows - 1;
   };
 
   return { setStartTargetMax };
@@ -178,9 +179,16 @@ const GridSetup = (() => {
 })();
 
 const Search = (() => {
+  const resultsContainer = document.querySelector("#results-container");
+  const visitsDisplay = document.querySelector("#visits");
+  const pathSizeDisplay = document.querySelector("#path-size");
   let speed = 50;
 
   const search = (algoType, start, end, markSpeed = 50) => {
+    // parse str to int
+    start = start.map((x) => parseInt(x));
+    end = end.map((x) => parseInt(x));
+
     speed = Math.max(0, markSpeed);
     switch (algoType) {
       case "bfs":
@@ -189,6 +197,13 @@ const Search = (() => {
       case "dfs":
         dfs(start, end);
         break;
+      case "dijkstra":
+        dijkstra(start, end);
+        break;
+      case "iteration":
+        iteration(start, end);
+        break;
+
       default:
         break;
     }
@@ -201,13 +216,60 @@ const Search = (() => {
     };
   }
 
+  function showResults(path, visited) {
+    pathSizeDisplay.textContent = path.length;
+    visitsDisplay.textContent = visited;
+    resultsContainer.classList.remove("hidden");
+  }
+
+  function clearResults() {
+    resultsContainer.classList.add("hidden");
+  }
+
+  const iteration = (start, end) => {
+    // create a counter object
+    const iterationCounter = counter();
+
+    // mark start and target cells
+    GridSetup.markCell(start[0], start[1], "start");
+    GridSetup.markCell(end[0], end[1], "target");
+
+    const path = [];
+
+    // Loop through all cells
+    for (let i = 0; i < rows * cols; i++) {
+      const row = Math.floor(i / cols);
+      const col = i % cols;
+
+      // add to path
+      path.push([row, col]);
+
+      // mark visited cells
+      setTimeout(() => {
+        GridSetup.markCell(row, col, "visited");
+      }, speed * iterationCounter());
+
+      if (row === end[0] && col === end[1]) {
+        // mark path
+        setTimeout(() => {
+          path.forEach((node) => {
+            GridSetup.markCell(node[0], node[1], "path");
+          });
+        }, speed * iterationCounter());
+
+        // show results
+        showResults(path, path.length);
+        return path;
+      }
+    }
+
+    // path not found
+    return [];
+  };
+
   const bfs = (start, end) => {
     // create a counter object
     const bfsCounter = counter();
-
-    // parse str to int
-    start = start.map((x) => parseInt(x));
-    end = end.map((x) => parseInt(x));
 
     // mark start and target cells
     GridSetup.markCell(start[0], start[1], "start");
@@ -264,7 +326,8 @@ const Search = (() => {
             GridSetup.markCell(node[0], node[1], "path");
           });
         }, bfsCounter() * speed);
-        console.log(path, visited);
+        // console.log(path, visited);
+        showResults(path, visited.size);
         return [path, visited];
       }
 
@@ -293,10 +356,6 @@ const Search = (() => {
       console.log("start is end");
       return;
     }
-
-    // Parse str to int
-    start = start.map((x) => parseInt(x));
-    end = end.map((x) => parseInt(x));
 
     // mark start and target cells
     GridSetup.markCell(start[0], start[1], "start");
@@ -346,7 +405,8 @@ const Search = (() => {
           });
         }, dfsCounter() * speed);
 
-        console.log(path, visited);
+        // console.log(path, visited);
+        showResults(path, visited.size);
         return [path, visited];
       }
       // get the children of the current node
@@ -365,6 +425,10 @@ const Search = (() => {
     }
     console.log("no path found");
     return [];
+  };
+
+  const dijkstra = (start, end) => {
+    console.log("Not implemented yet");
   };
 
   //  Returns an array of neighbor nodes
@@ -390,7 +454,7 @@ const Search = (() => {
     return children;
   };
 
-  return { search };
+  return { search, clearResults };
 })();
 
 window.onload = () => {
