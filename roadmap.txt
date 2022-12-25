@@ -7,3 +7,24 @@ User pick start and end positions by clicking on grid
 Add other algorithms or variants (Traditional Iteration, Djikstra's shortest path)
 Skip to end button (The idea is to stop clearGrid (which also stops all timeouts) then re-execute the function without timeouts)
 pause and play buttons
+store the nodes as objects to make it easy to calculate distances and also easier to read. (For A* and Dijkstra)
+
+PATHFINDING (MAKE IT LOOK LIKE A MAZE)
+
+add greedy tuning UI option for the A* algorithm
+
+Show algorithms illustrations simultaneously
+
+animation speed setting
+
+
+
+BFS
+
+
+Dijkstra
+Uses weights(such as distance) that each node has from the soource
+to find the shortest path (the weights could be adjusted to meet fctors and constraints)
+Uses more computational power and memory in comparison to BFS
+In this application the weights are 1 unit for each node so its better to use
+BFS over Dijkstra as its faster than dijkstra

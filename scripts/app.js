@@ -167,6 +167,8 @@ const GridSetup = (() => {
       case "path":
         cell.classList.add("path");
         break;
+      case "frontier":
+        cell.classList.add("frontier");
       default:
         break;
     }
@@ -178,7 +180,7 @@ const GridSetup = (() => {
 
     const cells = document.querySelectorAll(".cell");
     cells.forEach((cell) => {
-      cell.classList.remove("start", "target", "visited", "path");
+      cell.classList.remove("start", "target", "visited", "path", "frontier");
     });
   };
 
@@ -213,6 +215,10 @@ const Search = (() => {
         break;
       case "iteration":
         iteration(start, end);
+        break;
+
+      case "a-star":
+        aStar(start, end);
         break;
 
       default:
@@ -399,6 +405,13 @@ const Search = (() => {
           frontier.add(child.toString());
           // add neighbor to parents
           parent.set(child.toString(), node);
+
+          // mark frontier nodes
+          timeOutExecutionIds.add(
+            setTimeout(() => {
+              GridSetup.markCell(child[0], child[1], "frontier");
+            }, bfsCounter() * speed)
+          );
         }
       }
     }
@@ -483,6 +496,13 @@ const Search = (() => {
           // add child to stack
           stack.push(child);
           frontier.add(child.toString());
+
+          // mark frontier nodes
+          timeOutExecutionIds.add(
+            setTimeout(() => {
+              GridSetup.markCell(child[0], child[1], "frontier");
+            }, dfsCounter() * speed)
+          );
         }
       }
     }
@@ -505,16 +525,23 @@ const Search = (() => {
     const queue = new DataStructures.PriorityQueue();
 
     // add start node to queue
-    queue.enqueue(start, 0 + heuristic(start, end));
+    queue.enqueue(start, 0);
 
     // keep track of the distance from the start node to each node
-    const frontier = new Map();
-    frontier.set(start.toString(), 0);
+    const distances = new Map();
+    distances.set(start.toString(), 0);
 
     while (queue.size() > 0) {
-      const node = queue.dequeue().value;
-      const nodeDistance = frontier.get(node.toString());
-      frontier.delete(node.toString());
+      let node = queue.dequeue();
+      let distanceFromSrc = node.priority;
+      node = node.value;
+
+      // check if node is already being visited
+      // we do this here because all visited nodes have the best distance so far
+      // so we don't need to check them again ()
+      if (visited.has(node.toString())) {
+        continue;
+      }
 
       // add node to visited
       visited.add(node.toString());
@@ -554,34 +581,130 @@ const Search = (() => {
       // loop through neighbors
       for (const child of children) {
         // calculate the distance from the start node to the child
-        const newDistance = nodeDistance + 1;
+        const newDistance = distanceFromSrc + 1;
 
-        // if child is not visited and not in the queue
-        if (!visited.has(child.toString()) && !frontier.has(child.toString())) {
-          // update the distance to the child
-          frontier.set(child.toString(), newDistance);
-          // add child to parent
+        // Add a child as long as its not in the queue or its in the queue but with a greater distance
+        if (
+          !distances.has(child.toString()) ||
+          distances.get(child.toString()) > newDistance
+        ) {
+          distances.set(child.toString(), newDistance);
           parent.set(child.toString(), node);
           // add child to queue
-          queue.enqueue(child, newDistance + heuristic(child, end));
+          queue.enqueue(child, newDistance);
+
+          // mark frontier nodes
+          timeOutExecutionIds.add(
+            setTimeout(() => {
+              GridSetup.markCell(child[0], child[1], "frontier");
+            }, dijkstraCounter() * speed)
+          );
         }
-        // Otherwise if child is in the queue and the new distance is less than the old distance
-        else if (
-          frontier.has(child.toString()) &&
-          frontier.get(child.toString()) > newDistance
-        ) {
-          // update the distance to the child
-          frontier.set(child.toString(), newDistance);
-          // add child to parent
-          parent.set(child.toString(), node);
+      }
+    }
 
-          // delete child with old distance from queue
-          queue.delete(child.toString());
+    console.log("no path found");
+    showResults([], visited.size);
+    return [];
+  };
 
-          // add child to queue with updated distance (replace old child with new child)
-          queue.enqueue(
-            child,
-            frontier.get(child.toString()) + heuristic(child, end)
+  /* 
+    A* algorithm also known as Best First Search
+   */
+  const aStar = (start, end) => {
+    // mark start and target cells
+    GridSetup.markCell(start[0], start[1], "start");
+    GridSetup.markCell(end[0], end[1], "target");
+
+    // create a counter object
+    const aStarCounter = counter();
+
+    const visited = new Set();
+    const parent = new Map();
+
+    // create a priority queue
+    const queue = new DataStructures.PriorityQueue();
+
+    // add start node to queue
+    const startNode = new DataStructures.Node(start, null);
+    const endNode = new DataStructures.Node(end, null);
+    queue.enqueue(startNode, 0);
+
+    // keep track of the distance from the start node to each node
+    const distances = new Map();
+    distances.set(start.toString(), 0);
+
+    while (queue.size() > 0) {
+      let node = queue.dequeue().value;
+      //   let distanceFromSrc = node.priority;
+      //   node = node.value;
+
+      // check if node is already being visited
+      // we do this here because all visited nodes have the best distance so far
+      // so we don't need to check them again ()
+      if (visited.has(node.toString())) {
+        continue;
+      }
+
+      // add node to visited
+      visited.add(node.toString());
+      timeOutExecutionIds.add(
+        setTimeout(() => {
+          GridSetup.markCell(node.value[0], node.value[1], "visited");
+        }, aStarCounter() * speed)
+      );
+
+      // check if node is end
+      if (node.equals(endNode)) {
+        // backtrack to get the path
+        const path = [];
+        let current = node;
+        while (current.toString() !== start.toString()) {
+          path.push(current.value);
+          //   current = parent.get(current.toString());
+          current = current.parent;
+        }
+        path.push(start);
+        path.reverse();
+        // mark path
+        timeOutExecutionIds.add(
+          setTimeout(() => {
+            path.forEach((node) => {
+              GridSetup.markCell(node[0], node[1], "path");
+            });
+          }, aStarCounter() * speed)
+        );
+
+        // console.log(path, visited);
+        showResults(path, visited.size);
+        return [path, visited];
+      }
+
+      // get neighbors
+      const children = neighbours(node.value);
+      // loop through neighbors
+      for (const child of children) {
+        const childNode = new DataStructures.Node(child, node);
+        childNode.g = node.g + 1;
+        childNode.h = heuristic(child, end);
+        childNode.f = childNode.g + childNode.h;
+
+        // check if node is already being visited
+        if (visited.has(childNode.toString())) {
+          continue;
+        }
+
+        // Add a child as long as its not in
+        // the queue or its in the queue but with a greater distance
+        if (!queue.has(childNode) || childNode.g < queue.get(childNode).g) {
+          // add child to queue
+          queue.enqueue(childNode, childNode.f);
+
+          // mark frontier nodes
+          timeOutExecutionIds.add(
+            setTimeout(() => {
+              GridSetup.markCell(child[0], child[1], "frontier");
+            }, aStarCounter() * speed)
           );
         }
       }
@@ -595,10 +718,10 @@ const Search = (() => {
   // heuristic function
   function heuristic(a, b) {
     // Manhattan distance
-    return manhattanDistance(a, b);
+    // return manhattanDistance(a, b);
 
     // Euclidean distance
-    // return euclideanDistance(a, b);
+    return euclideanDistance(a, b);
   }
 
   // find the manhattan distance between two nodes (this is our heuristic function)
@@ -608,29 +731,32 @@ const Search = (() => {
 
   // find the euclidean distance between two nodes (this is our heuristic function)
   function euclideanDistance(a, b) {
-    return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
+    // the 0.6 is to  make the algorithm more greedy , a higher number can be used to make it more greedy
+    return (Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2)) ** 0.6;
   }
 
   //  Returns an array of neighbor nodes
   const neighbours = (node) => {
     const [row, col] = node;
     const children = [];
-    // up
-    if (row > 0) {
-      children.push([row - 1, col]);
+
+    // left
+    if (col > 0) {
+      children.push([row, col - 1]);
     }
     // down
     if (row < rows - 1) {
       children.push([row + 1, col]);
     }
-    // left
-    if (col > 0) {
-      children.push([row, col - 1]);
-    }
     // right
     if (col < cols - 1) {
       children.push([row, col + 1]);
     }
+    // up
+    if (row > 0) {
+      children.push([row - 1, col]);
+    }
+
     return children;
   };
 
@@ -662,11 +788,39 @@ const DataStructures = (() => {
       this.sort();
     }
 
+    get(node) {
+      return this.values.find((n) => n.value.equals(node));
+    }
+
+    has(node) {
+      return this.values.some((n) => n.value.equals(node));
+    }
+
     size() {
       return this.values.length;
     }
   }
-  return { PriorityQueue };
+
+  class Node {
+    constructor(value, parent = null) {
+      this.parent = parent;
+      this.value = value;
+      // this.children = [];
+      this.g = 0;
+      this.h = 0;
+      this.f = 0;
+    }
+
+    equals(node) {
+      return this.value.toString() === node.value.toString();
+    }
+
+    toString() {
+      return this.value.toString();
+    }
+  }
+
+  return { PriorityQueue, Node };
 })();
 
 window.onload = () => {
