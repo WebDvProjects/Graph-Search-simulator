@@ -122,7 +122,36 @@ const FormControl = (() => {
     targetRow.max = rows - 1;
   };
 
-  return { setStartTargetMax };
+  /* 
+Set the position of the start and target nodes in the form
+from clicking on the grid
+*/
+  const setPositions = function (type) {
+    const selected = document.querySelectorAll(`.${type}`);
+    if (selected.length > 0 && selected.length < 2) {
+      const [row, col] = [...selected].map((cell) => [
+        cell.getAttribute("data-row"),
+        cell.getAttribute("data-col"),
+      ])[0];
+      if (type === "start") {
+        startRow.value = row;
+        startCol.value = col;
+      } else {
+        targetRow.value = row;
+        targetCol.value = col;
+      }
+    } else {
+      if (type === "start") {
+        startRow.value = "";
+        startCol.value = "";
+      } else {
+        targetRow.value = "";
+        targetCol.value = "";
+      }
+    }
+  };
+
+  return { setStartTargetMax, setPositions };
 })();
 
 const GridSetup = (() => {
@@ -137,6 +166,41 @@ const GridSetup = (() => {
       const col = i % width;
       cell.setAttribute("data-row", row);
       cell.setAttribute("data-col", col);
+
+      // set custom tooltip value
+      cell.style.setProperty("--row-pos", row);
+      cell.style.setProperty("--col-pos", col);
+
+      // add event listener that allows to select the start and end nodes
+      cell.addEventListener("click", (e) => {
+        // set cell as target if shift key is pressed while clicking
+        // can unselect by clicking again
+        if (e.shiftKey) {
+          const selectedTargets = document.querySelectorAll(".target");
+          // check if there is already a target selected and if the cell is not the same as the selected target
+          if (
+            (selectedTargets.length > 0 &&
+              !!![...selectedTargets].find((target) => cell === target)) ||
+            cell.classList.contains("start")
+          ) {
+            return;
+          }
+          // toggle target class
+          cell.classList.toggle("target");
+          FormControl.setPositions("target");
+        } else {
+          const selectedStarts = document.querySelectorAll(".start");
+          if (
+            (selectedStarts.length > 0 &&
+              !!![...selectedStarts].find((start) => cell === start)) ||
+            cell.classList.contains("target")
+          ) {
+            return;
+          }
+          cell.classList.toggle("start");
+          FormControl.setPositions("start");
+        }
+      });
 
       grid.appendChild(cell);
     }
