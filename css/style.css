@@ -141,6 +141,10 @@ body {
   background-color: rgb(227, 91, 114);
 }
 
+.cell.wall {
+  background-color: rgb(0, 0, 0);
+}
+
 form {
   display: grid;
   justify-content: space-between;
@@ -232,6 +236,46 @@ input[type="number"] {
   .buttons {
     justify-self: end;
   }
+}
+
+.control-buttons {
+  display: flex;
+  /* justify-content: space-between; */
+  align-items: center;
+  gap: 1rem;
+}
+
+.control-buttons button {
+  /* background-color: #000; */
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+}
+
+.control-buttons button:disabled {
+  background-color: #ccc !important;
+  color: #000 !important;
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.control-buttons #clear {
+  background-color: red;
+  color: white;
+}
+
+.control-buttons #toggle-walls.active {
+  background-color: #000;
+  color: #fff;
+  border-color: dodgerblue;
+}
+
+.control-buttons #erase-walls {
+  background-color: dodgerblue;
 }
 
 h1 {

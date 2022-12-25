@@ -5,6 +5,26 @@ const colsInput = document.querySelector("#cols");
 const submitBtn = document.querySelector("#generate");
 const stopBtn = document.querySelector("#stop-generate");
 
+// grid control buttons
+const clearBtn = document.querySelector("#clear");
+const clearWallsBtn = document.querySelector("#erase-walls");
+const toggleDrawing = document.querySelector("#toggle-walls");
+
+// toggle drawing walls
+toggleDrawing.addEventListener("click", () => {
+  toggleDrawing.classList.toggle("active");
+});
+
+// clears only walls
+clearWallsBtn.addEventListener("click", () => {
+  GridSetup.clearWalls();
+});
+
+// clears the whole grid
+clearBtn.addEventListener("click", () => {
+  GridSetup.clearGrid();
+});
+
 stopBtn.addEventListener("click", () => {
   Search.clearTimeOuts();
 });
@@ -89,6 +109,10 @@ const FormControl = (() => {
     // clear results
     Search.clearResults();
 
+    // disable drawing walls
+    toggleDrawing.classList.remove("active");
+    disableDrawingControlBtns();
+
     // perform search
     Search.search(
       algo,
@@ -136,9 +160,15 @@ from clicking on the grid
       if (type === "start") {
         startRow.value = row;
         startCol.value = col;
+        // remove validation error
+        startRow.setCustomValidity("");
+        startCol.setCustomValidity("");
       } else {
         targetRow.value = row;
         targetCol.value = col;
+        // remove validation error
+        targetRow.setCustomValidity("");
+        targetCol.setCustomValidity("");
       }
     } else {
       if (type === "start") {
@@ -155,6 +185,7 @@ from clicking on the grid
 })();
 
 const GridSetup = (() => {
+  let drawing = false;
   const createGrid = (width, height) => {
     // clear grid
     grid.innerHTML = "";
@@ -173,6 +204,9 @@ const GridSetup = (() => {
 
       // add event listener that allows to select the start and end nodes
       cell.addEventListener("click", (e) => {
+        // if we are drawing walls then don't allow to select start and end nodes
+        if (toggleDrawing.classList.contains("active")) return;
+
         // set cell as target if shift key is pressed while clicking
         // can unselect by clicking again
         if (e.shiftKey) {
@@ -202,9 +236,66 @@ const GridSetup = (() => {
         }
       });
 
+      // add an event listener to allow users to draw walls
+      cell.addEventListener("mousedown", (e) => {
+        if (toggleDrawing.classList.contains("active")) {
+          // toggle wall class
+          cell.classList.toggle("wall");
+          drawing = true;
+        }
+      });
+
+      cell.addEventListener("mouseenter", (e) => {
+        if (toggleDrawing.classList.contains("active") && drawing) {
+          // toggle wall class
+          cell.classList.toggle("wall");
+        }
+      });
+
+      cell.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        if (toggleDrawing.classList.contains("active")) {
+          // toggle wall class
+          cell.classList.toggle("wall");
+          drawing = true;
+        }
+      });
+
+      cell.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+        // get the touch element and current touch position
+        // ! NOTE: the target will always be the point where touchmove started
+        const touch = e.targetTouches[0];
+        const x = touch.clientX;
+        const y = touch.clientY;
+
+        // ! So we have to check what element is at position
+        const element = document.elementFromPoint(x, y);
+
+        // if the element is not a cell ignore
+        if (!element.classList.contains("cell")) return;
+
+        if (toggleDrawing.classList.contains("active") && drawing) {
+          // toggle wall class
+          element.classList.toggle("wall");
+        }
+      });
+
+      cell.addEventListener("dragstart", (e) => {
+        e.preventDefault();
+      });
+
       grid.appendChild(cell);
     }
   };
+
+  document.querySelector("body").addEventListener("mouseup", (e) => {
+    drawing = false;
+  });
+
+  document.querySelector("body").addEventListener("touchend", (e) => {
+    drawing = false;
+  });
 
   const updateGrid = (width, height) => {
     document.documentElement.style.setProperty("--grid-cols", cols);
@@ -242,13 +333,30 @@ const GridSetup = (() => {
     // clear any timeouts from serch functions
     Search.clearTimeOuts();
 
+    // enable drawing contol btns
+    enableDrawingControlBtns();
+
     const cells = document.querySelectorAll(".cell");
     cells.forEach((cell) => {
-      cell.classList.remove("start", "target", "visited", "path", "frontier");
+      cell.classList.remove(
+        "start",
+        "target",
+        "visited",
+        "path",
+        "frontier",
+        "wall"
+      );
     });
   };
 
-  return { createGrid, updateGrid, markCell, clearGrid };
+  const clearWalls = () => {
+    const cells = document.querySelectorAll(".cell");
+    cells.forEach((cell) => {
+      cell.classList.remove("wall");
+    });
+  };
+
+  return { createGrid, updateGrid, markCell, clearGrid, clearWalls };
 })();
 
 const Search = (() => {
@@ -886,6 +994,18 @@ const DataStructures = (() => {
 
   return { PriorityQueue, Node };
 })();
+
+function disableDrawingControlBtns() {
+  [toggleDrawing, clearWallsBtn].forEach((btn) => {
+    btn.disabled = true;
+  });
+}
+
+function enableDrawingControlBtns() {
+  [toggleDrawing, clearWallsBtn].forEach((btn) => {
+    btn.disabled = false;
+  });
+}
 
 window.onload = () => {
   // create initial grid
