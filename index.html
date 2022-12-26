@@ -6,16 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="css/style-reset.css" />
     <link rel="stylesheet" href="css/style.css" />
-    <script src="scripts/app.js" defer></script>
-
-    <script
-      type="module"
-      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
-    ></script>
-    <script
-      nomodule
-      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
-    ></script>
+    <script src="scripts/app.js" type="module" defer></script>
+    <script src="scripts/ui-settings.js" type="module" defer></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -32,7 +24,7 @@
         <h1>ALGO SIMULATOR</h1>
       </header>
 
-      <section class="sidebar">
+      <section class="sidebar closed">
         <div class="sidebar-content">
           <section class="grid-size">
             <h3>Grid Size</h3>
@@ -64,52 +56,56 @@
             </div>
           </section>
           <hr />
-          <fieldset class="algorithms minimized">
-            <legend>
+
+          <section class="algorithms-container">
+            <div class="dropdown-title">
               <p>Algorithms</p>
               <ion-icon
                 name="chevron-down-outline"
                 id="algorithms-toggler"
-                onclick="toggleAlgorithmsList(this)"
+                onclick="toggleAlgorithmsList()"
               ></ion-icon>
-            </legend>
-            <label for="iteration">
-              <input
-                type="radio"
-                name="algorithm"
-                id="iteration"
-                value="iter"
-              />
-              Iteration
-            </label>
-            <label for="dfs">
-              <input type="radio" name="algorithm" id="dfs" value="dfs" />
-              DFS
-            </label>
-            <label for="bfs">
-              <input type="radio" name="algorithm" id="bfs" value="bfs" />
-              BFS
-            </label>
-            <label for="dijkstra">
-              <input
-                type="radio"
-                name="algorithm"
-                id="dijkstra"
-                value="dijkstra"
-              />
-              Dijkstra
-            </label>
-            <label for="a-star">
-              <input
-                type="radio"
-                name="algorithm"
-                id="a-star"
-                value="a-star"
-                checked
-              />
-              A*
-            </label>
-          </fieldset>
+            </div>
+            <fieldset class="algorithms minimized">
+              <label for="iteration">
+                <input
+                  type="radio"
+                  name="algorithm"
+                  id="iteration"
+                  value="iter"
+                />
+                Iteration
+              </label>
+              <label for="dfs">
+                <input type="radio" name="algorithm" id="dfs" value="dfs" />
+                DFS
+              </label>
+              <label for="bfs">
+                <input type="radio" name="algorithm" id="bfs" value="bfs" />
+                BFS
+              </label>
+              <label for="dijkstra">
+                <input
+                  type="radio"
+                  name="algorithm"
+                  id="dijkstra"
+                  value="dijkstra"
+                />
+                Dijkstra
+              </label>
+              <label for="a-star">
+                <input
+                  type="radio"
+                  name="algorithm"
+                  id="a-star"
+                  value="a-star"
+                  checked
+                />
+                A*
+              </label>
+            </fieldset>
+          </section>
+
           <hr />
           <section class="start-end-pos">
             <section class="start-pos">
@@ -161,6 +157,7 @@
 
       <div class="grid-container">
         <div class="scrollable-wrapper">
+          <h2 id="algorithm-name"></h2>
           <div class="control-buttons">
             <button type="button" id="clear">CLEAR GRID</button>
             <button type="button" id="toggle-walls">DRAW WALLS</button>
@@ -173,8 +170,8 @@
           <div class="grid"></div>
           <!-- </div> -->
 
-          <div class="hidden" id="results-container">
-            <h2>Path Results</h2>
+          <div class="" id="results-container">
+            <h2>Summary</h2>
             <!-- <br /> -->
             <p>Visits: <span id="visits"></span></p>
             <br />
@@ -185,8 +182,8 @@
     </div>
 
     <script>
+      const sidebar = document.querySelector(".sidebar");
       function toggleSideBar() {
-        const sidebar = document.querySelector(".sidebar");
         const sidebarToggler = document.querySelector(".sidebar-toggler");
         const sidebarContent = document.querySelector(".sidebar-content");
         const sidebarTogglerIcon = document.querySelector(
@@ -195,27 +192,38 @@
 
         if (sidebar.classList.contains("closed")) {
           sidebar.classList.remove("closed");
-          sidebarTogglerIcon.setAttribute("name", "chevron-back-circle-sharp");
         } else {
           sidebar.classList.add("closed");
-          sidebarTogglerIcon.setAttribute(
-            "name",
-            "chevron-forward-circle-sharp"
-          );
         }
       }
 
-      function toggleAlgorithmsList(toggler) {
+      function toggleAlgorithmsList() {
         const algorithms = document.querySelector(".algorithms");
 
         if (algorithms.classList.contains("minimized")) {
           algorithms.classList.remove("minimized");
-          toggler.setAttribute("name", "chevron-up-outline");
         } else {
           algorithms.classList.add("minimized");
-          toggler.setAttribute("name", "chevron-down-outline");
         }
       }
+
+      // event listener to close menu when clicking outside of it
+      document.querySelector("body").addEventListener("click", (e) => {
+        if (sidebar.classList.contains("closed")) return;
+
+        // check if sidebar contains the target of the click event, if it does then do nothing
+        if (!sidebar.contains(e.target)) {
+          toggleSideBar();
+        }
+      });
     </script>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
   </body>
 </html>

@@ -6,7 +6,7 @@ TODO:
 Improve UI
 Add Key
 ///user pick start and end positions by clicking on grid
-///Add other algorithms or variants (Traditional Iteration, Djikstra's shortest path)
+/Add other algorithms or variants (Traditional Iteration, Djikstra's shortest path)
 Skip to end button (The idea is to stop clearGrid (which also stops all timeouts) then re-execute the function without timeouts)
 pause and play buttons
 ///store the nodes as node objects to make it easy to calculate distances and also easier to read. (For A* and Dijkstra)
@@ -20,6 +20,13 @@ Show algorithms illustrations simultaneously
 animation speed setting
 
 make cell event listeners separate functions so that code is easier to read
+
+stop user form selecting start and end nodes when the animation is running unless they clear or stop the animation
+
+only validate input when user is inserting values in the form otherwise have the user pick the start and target nodes straight from the grid
+
+fixed-grid size
+
 
 
 BFS

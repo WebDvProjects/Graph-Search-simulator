@@ -1,14 +1,20 @@
+import { getSpeed } from "./ui-settings.js";
+
 const grid = document.querySelector(".grid");
 const rowsInput = document.querySelector("#rows");
 const colsInput = document.querySelector("#cols");
 const submitBtn = document.querySelector("#generate");
 const stopBtn = document.querySelector("#stop-generate");
+const currentAlgoName = document.querySelector("#algorithm-name");
+
+let drawing = false;
 
 // grid control buttons
 const clearBtn = document.querySelector("#clear");
 const clearWallsBtn = document.querySelector("#erase-walls");
 const toggleDrawing = document.querySelector("#toggle-walls");
 
+/* EVENT LISTENERS */
 // toggle drawing walls
 toggleDrawing.addEventListener("click", () => {
   toggleDrawing.classList.toggle("active");
@@ -29,16 +35,46 @@ stopBtn.addEventListener("click", () => {
   Search.clearTimeOuts();
 });
 
+document.querySelector("body").addEventListener("mouseup", function () {
+  drawing = false;
+});
+
+document.querySelector("body").addEventListener("touchend", function () {
+  drawing = false;
+});
+
 let cols = rowsInput.value;
 let rows = colsInput.value;
 
-const FormControl = (() => {
+const InputControl = (() => {
   const startCol = document.querySelector("#start-col");
   const startRow = document.querySelector("#start-row");
   const targetCol = document.querySelector("#target-col");
   const targetRow = document.querySelector("#target-row");
 
-  /* EVENT LISTENERS */
+  // set algorithm title
+  function setAlgorithmTitle(algo_id) {
+    switch (algo_id) {
+      case "bfs":
+        currentAlgoName.textContent = "Breadth First Search";
+        break;
+      case "dfs":
+        currentAlgoName.textContent = "Depth First Search";
+        break;
+      case "dijkstra":
+        currentAlgoName.textContent = "Dijkstra's Algorithm";
+        break;
+      case "a-star":
+        currentAlgoName.textContent = "A* Search";
+        break;
+      case "idps":
+        currentAlgoName.textContent = "Iterative Deepening Search";
+        break;
+      case "iteration":
+        currentAlgoName.textContent = "Iteration";
+        break;
+    }
+  }
 
   for (const input of [rowsInput, colsInput]) {
     input.addEventListener("input", () => {
@@ -88,7 +124,7 @@ const FormControl = (() => {
   submitBtn.onclick = function (e) {
     e.preventDefault();
 
-    // validate form in case user didn't use input
+    // validate user input
     for (const input of [
       rowsInput,
       colsInput,
@@ -106,9 +142,6 @@ const FormControl = (() => {
       }
     }
 
-    // perform search function
-    const algo = document.querySelector('input[name="algorithm"]:checked').id;
-
     // clear grid
     GridSetup.clearGrid();
 
@@ -119,7 +152,12 @@ const FormControl = (() => {
     toggleDrawing.classList.remove("active");
     disableDrawingControlBtns();
 
-    // perform search
+    const algo = document.querySelector('input[name="algorithm"]:checked').id;
+
+    // set algorithm title
+    setAlgorithmTitle(algo);
+
+    // perform search function
     Search.search(
       algo,
       [startRow.value, startCol.value],
@@ -187,11 +225,10 @@ from clicking on the grid
     }
   };
 
-  return { setStartTargetMax, setPositions };
+  return { setStartTargetMax, setPositions, setAlgorithmTitle };
 })();
 
-const GridSetup = (() => {
-  let drawing = false;
+const GridSetup = (function () {
   const createGrid = (width, height) => {
     // clear grid
     grid.innerHTML = "";
@@ -242,12 +279,12 @@ const GridSetup = (() => {
           }
           // toggle target class
           cell.classList.toggle("target");
-          FormControl.setPositions("target");
+          InputControl.setPositions("target");
 
           return;
         }
         cell.classList.toggle("start");
-        FormControl.setPositions("start");
+        InputControl.setPositions("start");
       });
 
       /* 
@@ -284,12 +321,12 @@ const GridSetup = (() => {
           }
           // toggle target class
           cell.classList.toggle("target");
-          FormControl.setPositions("target");
+          InputControl.setPositions("target");
 
           return;
         }
         cell.classList.toggle("start");
-        FormControl.setPositions("start");
+        InputControl.setPositions("start");
       });
 
       // add an event listener to allow users to draw walls
@@ -375,14 +412,6 @@ const GridSetup = (() => {
     }
   };
 
-  document.querySelector("body").addEventListener("mouseup", (e) => {
-    drawing = false;
-  });
-
-  document.querySelector("body").addEventListener("touchend", (e) => {
-    drawing = false;
-  });
-
   const updateGrid = (width, height) => {
     document.documentElement.style.setProperty("--grid-cols", cols);
     document.documentElement.style.setProperty("--grid-rows", rows);
@@ -443,14 +472,21 @@ const GridSetup = (() => {
     return cell.classList.contains("wall");
   };
 
-  return { createGrid, updateGrid, markCell, clearGrid, clearWalls, isWall };
+  return {
+    createGrid,
+    updateGrid,
+    markCell,
+    clearGrid,
+    clearWalls,
+    isWall,
+  };
 })();
 
 const Search = (() => {
   const resultsContainer = document.querySelector("#results-container");
   const visitsDisplay = document.querySelector("#visits");
   const pathSizeDisplay = document.querySelector("#path-size");
-  let speed = 50;
+  let delay = 50;
   let timeOutExecutionIds = new Set();
 
   const search = (algoType, start, end, markSpeed = 50) => {
@@ -461,7 +497,7 @@ const Search = (() => {
     start = start.map((x) => parseInt(x));
     end = end.map((x) => parseInt(x));
 
-    speed = Math.max(0, markSpeed);
+    delay = Math.max(0, markSpeed);
     switch (algoType) {
       case "bfs":
         bfs(start, end);
@@ -511,11 +547,13 @@ const Search = (() => {
   function showResults(path, visited) {
     pathSizeDisplay.textContent = path.length;
     visitsDisplay.textContent = visited;
-    resultsContainer.classList.remove("hidden");
+    // resultsContainer.classList.remove("hidden");
   }
 
   function clearResults() {
-    resultsContainer.classList.add("hidden");
+    // resultsContainer.classList.add("hidden");
+    pathSizeDisplay.textContent = "";
+    visitsDisplay.textContent = "";
   }
 
   const iteration = (start, end) => {
@@ -567,7 +605,7 @@ const Search = (() => {
       timeOutExecutionIds.add(
         setTimeout(() => {
           GridSetup.markCell(row, col, "visited");
-        }, speed * iterationCounter())
+        }, delay * iterationCounter())
       );
 
       if (i === endIndex) {
@@ -577,7 +615,7 @@ const Search = (() => {
             for (const node of path) {
               GridSetup.markCell(node[0], node[1], "path");
             }
-          }, speed * iterationCounter())
+          }, delay * iterationCounter())
         );
 
         // show results
@@ -632,7 +670,7 @@ const Search = (() => {
       timeOutExecutionIds.add(
         setTimeout(() => {
           GridSetup.markCell(node[0], node[1], "visited");
-        }, bfsCounter() * speed)
+        }, bfsCounter() * delay)
       );
 
       // check if node is end
@@ -653,7 +691,7 @@ const Search = (() => {
             for (const node of path) {
               GridSetup.markCell(node[0], node[1], "path");
             }
-          }, bfsCounter() * speed)
+          }, bfsCounter() * delay)
         );
         // console.log(path, visited);
         showResults(path, visited.size);
@@ -674,7 +712,7 @@ const Search = (() => {
           timeOutExecutionIds.add(
             setTimeout(() => {
               GridSetup.markCell(child[0], child[1], "frontier");
-            }, bfsCounter() * speed)
+            }, bfsCounter() * delay)
           );
         }
       }
@@ -724,7 +762,7 @@ const Search = (() => {
       timeOutExecutionIds.add(
         setTimeout(() => {
           GridSetup.markCell(node[0], node[1], "visited");
-        }, dfsCounter() * speed)
+        }, dfsCounter() * delay)
       );
 
       // if node is the target node, we're done
@@ -744,7 +782,7 @@ const Search = (() => {
             for (const node of path) {
               GridSetup.markCell(node[0], node[1], "path");
             }
-          }, dfsCounter() * speed)
+          }, dfsCounter() * delay)
         );
 
         // console.log(path, visited);
@@ -767,7 +805,7 @@ const Search = (() => {
           timeOutExecutionIds.add(
             setTimeout(() => {
               GridSetup.markCell(child[0], child[1], "frontier");
-            }, dfsCounter() * speed)
+            }, dfsCounter() * delay)
           );
         }
       }
@@ -815,7 +853,7 @@ const Search = (() => {
       timeOutExecutionIds.add(
         setTimeout(() => {
           GridSetup.markCell(node[0], node[1], "visited");
-        }, dijkstraCounter() * speed)
+        }, dijkstraCounter() * delay)
       );
 
       // check if node is end
@@ -835,7 +873,7 @@ const Search = (() => {
             for (const node of path) {
               GridSetup.markCell(node[0], node[1], "path");
             }
-          }, dijkstraCounter() * speed)
+          }, dijkstraCounter() * delay)
         );
 
         // console.log(path, visited);
@@ -864,7 +902,7 @@ const Search = (() => {
           timeOutExecutionIds.add(
             setTimeout(() => {
               GridSetup.markCell(child[0], child[1], "frontier");
-            }, dijkstraCounter() * speed)
+            }, dijkstraCounter() * delay)
           );
         }
       }
@@ -918,7 +956,7 @@ const Search = (() => {
       timeOutExecutionIds.add(
         setTimeout(() => {
           GridSetup.markCell(node.value[0], node.value[1], "visited");
-        }, aStarCounter() * speed)
+        }, aStarCounter() * delay)
       );
 
       // check if node is end
@@ -939,7 +977,7 @@ const Search = (() => {
             for (const node of path) {
               GridSetup.markCell(node[0], node[1], "path");
             }
-          }, aStarCounter() * speed)
+          }, aStarCounter() * delay)
         );
 
         // console.log(path, visited);
@@ -971,7 +1009,7 @@ const Search = (() => {
           timeOutExecutionIds.add(
             setTimeout(() => {
               GridSetup.markCell(child[0], child[1], "frontier");
-            }, aStarCounter() * speed)
+            }, aStarCounter() * delay)
           );
         }
       }
@@ -1118,5 +1156,10 @@ window.onload = () => {
   // create initial grid
   GridSetup.updateGrid(cols, rows);
   // set max value for start and target inputs
-  FormControl.setStartTargetMax(rows, cols);
+  InputControl.setStartTargetMax(rows, cols);
+
+  // set current algorithm title
+  InputControl.setAlgorithmTitle(
+    document.querySelector(".algorithms :checked").id
+  );
 };
