@@ -335,17 +335,52 @@ input[type="number"] {
 #stop-generate {
   font-size: 3rem;
   cursor: pointer;
+  /* position: relative; */
+  /* display: flex; */
+  /* flex: 0 0 auto; */
+  /* z-index: 1; */
+}
+
+.start-btn {
+  position: relative;
+}
+
+.start-btn::after {
+  content: "Please select a start and end position";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  background-color: rgba(0, 0, 0, 0.821);
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  /* display: block; */
+  z-index: 3;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.2s ease-in-out;
+}
+
+.start-btn:is(.start-error)::after {
+  visibility: visible;
+  opacity: 1;
 }
 
 .control-buttons {
+  flex-shrink: 0;
   display: flex;
   /* flex-direction: column; */
   /* justify-content: space-between; */
   align-items: start;
   gap: 1rem;
 
-  /* position: relative;
-  top: 5%; */
+  position: relative;
+  /* width: 100%; */
+
+  /* overflow: auto; */
 }
 
 .control-buttons button {

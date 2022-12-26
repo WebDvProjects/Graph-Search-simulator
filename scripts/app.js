@@ -3,8 +3,8 @@ import { getSpeed } from "./ui-settings.js";
 const grid = document.querySelector(".grid");
 const rowsInput = document.querySelector("#rows");
 const colsInput = document.querySelector("#cols");
-const submitBtn = document.querySelector("#generate");
-const stopBtn = document.querySelector("#stop-generate");
+const submitBtn = document.querySelector(".start-btn");
+const stopBtn = document.querySelector(".stop-btn");
 const currentAlgoName = document.querySelector("#algorithm-name");
 
 let drawing = false;
@@ -31,6 +31,9 @@ clearWallsBtn.addEventListener("click", () => {
 clearBtn.addEventListener("click", () => {
   GridSetup.clearWalls();
   GridSetup.clearGrid();
+
+  // clear start and end inputs
+  InputControl.clearInputs();
 });
 
 // set the title of the current active algorithm
@@ -133,22 +136,19 @@ const InputControl = (() => {
   submitBtn.onclick = function (e) {
     e.preventDefault();
 
-    // validate user input
-    for (const input of [
-      rowsInput,
-      colsInput,
-      startCol,
-      startRow,
-      targetCol,
-      targetRow,
-    ]) {
-      if (!!!input.value) {
-        input.setCustomValidity("This field is required");
-        input.reportValidity();
-        return;
-      } else {
-        input.setCustomValidity("");
-      }
+    // if there is no start or end node selected
+    if (document.querySelectorAll(":is(.start, .target)").length < 2) {
+      // display error message
+      submitBtn.classList.add("start-error");
+
+      // set a delay to remove the error message
+      setTimeout(() => {
+        submitBtn.classList.remove("start-error");
+      }, 2000);
+
+      return;
+    } else {
+      submitBtn.classList.remove("start-error");
     }
 
     // clear grid
@@ -173,6 +173,12 @@ const InputControl = (() => {
       [targetRow.value, targetCol.value],
       getSpeed()
     );
+  };
+  // clear start and target position inputs
+  const clearInputs = () => {
+    for (const input of [startCol, startRow, targetCol, targetRow]) {
+      input.value = "";
+    }
   };
 
   const customValidation = (input, msg) => {
@@ -235,7 +241,7 @@ from clicking on the grid
     }
   };
 
-  return { setStartTargetMax, setPositions, setAlgorithmTitle };
+  return { setStartTargetMax, setPositions, setAlgorithmTitle, clearInputs };
 })();
 
 const GridSetup = (function () {

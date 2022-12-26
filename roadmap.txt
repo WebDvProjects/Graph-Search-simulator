@@ -23,7 +23,7 @@ make cell event listeners separate functions so that code is easier to read
 
 stop user form selecting start and end nodes when the animation is running unless they clear or stop the animation
 
-only validate input when user is inserting values in the form otherwise have the user pick the start and target nodes straight from the grid
+///only validate input when user is inserting values in the form otherwise have the user pick the start and target nodes straight from the grid
 
 fixed-grid size
 
