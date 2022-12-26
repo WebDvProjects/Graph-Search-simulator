@@ -8,6 +8,10 @@ let numRegex = RegExp(/\d*/);
 slider.oninput = function () {
   // update the speed value
   speed = this.value / this.max;
+
+  // log the speed
+  slider.style.setProperty("--speed", `${this.value}`);
+
   // get the number portion of the width (ignores the unit ie. px)
   const width = numRegex.exec(sliderComputedStyle.width)[0];
 
@@ -24,5 +28,10 @@ slider.oninput = function () {
 function getSpeed() {
   return speed;
 }
+
+window.addEventListener("load", function () {
+  // trigger the slider input event to update the speed value
+  slider.dispatchEvent(new Event("input"));
+});
 
 export { getSpeed };

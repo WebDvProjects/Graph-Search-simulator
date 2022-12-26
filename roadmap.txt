@@ -17,7 +17,7 @@ add greedy tuning UI option for the A* algorithm
 
 Show algorithms illustrations simultaneously
 
-animation speed setting
+///animation speed setting
 
 make cell event listeners separate functions so that code is easier to read
 

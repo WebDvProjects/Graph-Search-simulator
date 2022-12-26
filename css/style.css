@@ -417,6 +417,10 @@ input[type="number"] {
 /* slider settings */
 #anim-speed {
   --thumb-pos: -64.5px;
+  --speed: 0;
+  counter-reset: speed var(--speed);
+
+  position: relative;
 
   appearance: none;
   height: 4px;
@@ -424,6 +428,15 @@ input[type="number"] {
   background: linear-gradient(30deg, red, #000);
 
   box-shadow: inset var(--thumb-pos) 0 #fff;
+}
+
+#anim-speed::after {
+  content: "x" counter(speed);
+  position: absolute;
+  top: -150%;
+  right: -25%;
+
+  color: white;
 }
 
 #anim-speed::-webkit-slider-thumb {

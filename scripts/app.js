@@ -8,6 +8,8 @@ const stopBtn = document.querySelector("#stop-generate");
 const currentAlgoName = document.querySelector("#algorithm-name");
 
 let drawing = false;
+// the maximum delay (milliseconds) between marking nodes on the grid
+let maxDelay = 100;
 
 // grid control buttons
 const clearBtn = document.querySelector("#clear");
@@ -29,6 +31,13 @@ clearWallsBtn.addEventListener("click", () => {
 clearBtn.addEventListener("click", () => {
   GridSetup.clearWalls();
   GridSetup.clearGrid();
+});
+
+// set the title of the current active algorithm
+document.querySelectorAll("fieldset > label > input").forEach((input) => {
+  input.addEventListener("click", () => {
+    InputControl.setAlgorithmTitle(input.id);
+  });
 });
 
 stopBtn.addEventListener("click", () => {
@@ -155,13 +164,14 @@ const InputControl = (() => {
     const algo = document.querySelector('input[name="algorithm"]:checked').id;
 
     // set algorithm title
-    setAlgorithmTitle(algo);
+    // setAlgorithmTitle(algo);
 
     // perform search function
     Search.search(
       algo,
       [startRow.value, startCol.value],
-      [targetRow.value, targetCol.value]
+      [targetRow.value, targetCol.value],
+      getSpeed()
     );
   };
 
@@ -489,7 +499,7 @@ const Search = (() => {
   let delay = 50;
   let timeOutExecutionIds = new Set();
 
-  const search = (algoType, start, end, markSpeed = 50) => {
+  const search = (algoType, start, end, markSpeed = 0) => {
     // clear any current executions timeouts
     clearTimeOuts();
 
@@ -497,7 +507,10 @@ const Search = (() => {
     start = start.map((x) => parseInt(x));
     end = end.map((x) => parseInt(x));
 
-    delay = Math.max(0, markSpeed);
+    // delay is inverseely proportional to the speed
+    // 100 being the max delay (therefore 0 delay is fastest)
+    delay = (1 - markSpeed) * maxDelay;
+
     switch (algoType) {
       case "bfs":
         bfs(start, end);
