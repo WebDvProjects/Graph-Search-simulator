@@ -1,5 +1,4 @@
 const grid = document.querySelector(".grid");
-const form = document.querySelector("form");
 const rowsInput = document.querySelector("#rows");
 const colsInput = document.querySelector("#cols");
 const submitBtn = document.querySelector("#generate");
@@ -86,7 +85,7 @@ const FormControl = (() => {
     });
   }
 
-  form.onsubmit = function (e) {
+  submitBtn.onclick = function (e) {
     e.preventDefault();
 
     // validate form in case user didn't use input
@@ -436,7 +435,15 @@ const GridSetup = (() => {
     }
   };
 
-  return { createGrid, updateGrid, markCell, clearGrid, clearWalls };
+  // check if cell is a wall
+  const isWall = (row, col) => {
+    const cell = document.querySelector(
+      `.cell[data-row="${row}"][data-col="${col}"]`
+    );
+    return cell.classList.contains("wall");
+  };
+
+  return { createGrid, updateGrid, markCell, clearGrid, clearWalls, isWall };
 })();
 
 const Search = (() => {
@@ -547,6 +554,11 @@ const Search = (() => {
     for (let i = startIndex; i < rows * cols; i++) {
       const row = Math.floor(i / cols);
       const col = i % cols;
+
+      // check if cell is a wall
+      if (GridSetup.isWall(row, col)) {
+        break;
+      }
 
       // add to path
       path.push([row, col]);
@@ -669,6 +681,8 @@ const Search = (() => {
     }
 
     // no path found
+    console.log("No path found");
+    showResults([], visited.size);
     return [];
   };
 
@@ -759,6 +773,7 @@ const Search = (() => {
       }
     }
     console.log("no path found");
+    showResults([], visited.size);
     return [];
   };
 
@@ -994,19 +1009,31 @@ const Search = (() => {
 
     // left
     if (col > 0) {
-      children.push([row, col - 1]);
+      // check if the node is not a wall
+      if (!GridSetup.isWall(row, col - 1)) {
+        children.push([row, col - 1]);
+      }
     }
     // down
     if (row < rows - 1) {
-      children.push([row + 1, col]);
+      // check if the node is not a wall
+      if (!GridSetup.isWall(row + 1, col)) {
+        children.push([row + 1, col]);
+      }
     }
     // right
     if (col < cols - 1) {
-      children.push([row, col + 1]);
+      // check if the node is not a wall
+      if (!GridSetup.isWall(row, col + 1)) {
+        children.push([row, col + 1]);
+      }
     }
     // up
     if (row > 0) {
-      children.push([row - 1, col]);
+      // check if the node is not a wall
+      if (!GridSetup.isWall(row - 1, col)) {
+        children.push([row - 1, col]);
+      }
     }
 
     return children;

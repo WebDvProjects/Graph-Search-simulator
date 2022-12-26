@@ -8,6 +8,15 @@
     <link rel="stylesheet" href="css/style.css" />
     <script src="scripts/app.js" defer></script>
 
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,129 +28,194 @@
   </head>
   <body>
     <div class="container">
-      <h1>ALGO SIMULATOR</h1>
-      <form action="">
-        <section class="grid-size">
-          <h3>Grid Size</h3>
-          <label for="cols">Cols</label>
-          <input
-            type="number"
-            name="cols"
-            id="cols"
-            min="2"
-            max="50"
-            value="20"
-          />
-          <label for="rows">Rows</label>
-          <input
-            type="number"
-            name="rows"
-            id="rows"
-            min="2"
-            max="50"
-            value="20"
-          />
-        </section>
+      <header>
+        <h1>ALGO SIMULATOR</h1>
+      </header>
 
-        <fieldset class="algorithms">
-          <legend>Algorithms</legend>
-          <label for="iteration">
-            <input type="radio" name="algorithm" id="iteration" value="iter" />
-            Iteration
-          </label>
-          <label for="dfs">
-            <input type="radio" name="algorithm" id="dfs" value="dfs" />
-            DFS
-          </label>
-          <label for="bfs">
-            <input type="radio" name="algorithm" id="bfs" value="bfs" />
-            BFS
-          </label>
-          <label for="dijkstra">
-            <input
-              type="radio"
-              name="algorithm"
-              id="dijkstra"
-              value="dijkstra"
-            />
-            Dijkstra
-          </label>
-          <label for="a-sar">
-            <input
-              type="radio"
-              name="algorithm"
-              id="a-star"
-              value="a-star"
-              checked
-            />
-            A*
-          </label>
-          <!-- <input type="radio" name="algorithm" id="iteration" value="iter" />
-          <label for="iteration">Iteration</label>
-          <input type="radio" name="algorithm" id="dfs" value="dfs" />
-          <label for="dfs">DFS</label>
-          <input type="radio" name="algorithm" id="bfs" value="bfs" checked />
-          <label for="bfs">BFS</label>
-          <input type="radio" name="algorithm" id="dijkstra" value="dijkstra" />
-          <label for="dijkstra">Dijkstra</label> -->
-        </fieldset>
+      <section class="sidebar">
+        <div class="sidebar-content">
+          <section class="grid-size">
+            <h3>Grid Size</h3>
 
-        <section class="start-end-pos">
-          <section class="start-pos">
-            <h3>Start Pos</h3>
             <div class="pos-wrapper">
-              <label for="start-row">
-                <p>Row</p>
-                <input type="number" name="rows" id="start-row" min="0" />
+              <label for="cols">
+                <p>Cols</p>
+                <input
+                  type="number"
+                  name="cols"
+                  id="cols"
+                  min="2"
+                  max="50"
+                  value="20"
+                />
               </label>
-              <label for="start-col">
-                <p>Col</p>
-                <input type="number" name="cols" id="start-col" min="0" />
+
+              <label for="rows">
+                <p>Rows</p>
+                <input
+                  type="number"
+                  name="rows"
+                  id="rows"
+                  min="2"
+                  max="50"
+                  value="20"
+                />
               </label>
             </div>
           </section>
+          <hr />
+          <fieldset class="algorithms minimized">
+            <legend>
+              <p>Algorithms</p>
+              <ion-icon
+                name="chevron-down-outline"
+                id="algorithms-toggler"
+                onclick="toggleAlgorithmsList(this)"
+              ></ion-icon>
+            </legend>
+            <label for="iteration">
+              <input
+                type="radio"
+                name="algorithm"
+                id="iteration"
+                value="iter"
+              />
+              Iteration
+            </label>
+            <label for="dfs">
+              <input type="radio" name="algorithm" id="dfs" value="dfs" />
+              DFS
+            </label>
+            <label for="bfs">
+              <input type="radio" name="algorithm" id="bfs" value="bfs" />
+              BFS
+            </label>
+            <label for="dijkstra">
+              <input
+                type="radio"
+                name="algorithm"
+                id="dijkstra"
+                value="dijkstra"
+              />
+              Dijkstra
+            </label>
+            <label for="a-star">
+              <input
+                type="radio"
+                name="algorithm"
+                id="a-star"
+                value="a-star"
+                checked
+              />
+              A*
+            </label>
+          </fieldset>
+          <hr />
+          <section class="start-end-pos">
+            <section class="start-pos">
+              <h3>Start Pos</h3>
+              <div class="pos-wrapper">
+                <label for="start-row">
+                  <p>Row</p>
+                  <input type="number" name="rows" id="start-row" min="0" />
+                </label>
+                <label for="start-col">
+                  <p>Col</p>
+                  <input type="number" name="cols" id="start-col" min="0" />
+                </label>
+              </div>
+            </section>
 
-          <section class="target-pos">
-            <h3>Target Pos</h3>
-            <div class="pos-wrapper">
-              <label for="target-row">
-                <p>Row</p>
-                <input type="number" name="rows" id="target-row" min="0" />
-              </label>
-              <label for="target-col">
-                <p>Col</p>
-                <input type="number" name="cols" id="target-col" min="0" />
-              </label>
-            </div>
+            <section class="target-pos">
+              <h3>Target Pos</h3>
+              <div class="pos-wrapper">
+                <label for="target-row">
+                  <p>Row</p>
+                  <input type="number" name="rows" id="target-row" min="0" />
+                </label>
+                <label for="target-col">
+                  <p>Col</p>
+                  <input type="number" name="cols" id="target-col" min="0" />
+                </label>
+              </div>
+            </section>
           </section>
-        </section>
-
-        <div class="buttons">
-          <button id="generate">START SEARCH</button>
-          <button type="button" id="stop-generate">STOP SEARCH</button>
+          <hr />
+          <section class="anim-slider-container">
+            <h3>Animation Speed</h3>
+            <input
+              type="range"
+              name="anim-speed"
+              id="anim-speed"
+              min="0"
+              max="100"
+              value="50"
+            />
+          </section>
         </div>
-      </form>
 
-      <div class="search-container">
-        <!-- <h2>Search Algorithms</h2> -->
-        <div class="grid-wrapper">
+        <div class="sidebar-toggler" onclick="toggleSideBar()">
+          <ion-icon name="chevron-back-circle-sharp"></ion-icon>
+        </div>
+      </section>
+
+      <div class="grid-container">
+        <div class="scrollable-wrapper">
+          <div class="control-buttons">
+            <button type="button" id="clear">CLEAR GRID</button>
+            <button type="button" id="toggle-walls">DRAW WALLS</button>
+            <button type="button" id="erase-walls">ERASE WALLS</button>
+
+            <ion-icon name="play-circle" id="generate"></ion-icon>
+            <ion-icon name="stop-circle" id="stop-generate"></ion-icon>
+          </div>
+          <!-- <div class="grid-wrapper"> -->
           <div class="grid"></div>
-        </div>
+          <!-- </div> -->
 
-        <div class="control-buttons">
-          <button type="button" id="clear">CLEAR GRID</button>
-          <button type="button" id="toggle-walls">DRAW WALLS</button>
-          <button type="button" id="erase-walls">ERASE WALLS</button>
-        </div>
-
-        <div class="hidden" id="results-container">
-          <h2>Path Results</h2>
-          <!-- <br /> -->
-          <p>Visits: <span id="visits"></span></p>
-          <br />
-          <p>Path Length: <span id="path-size"></span></p>
+          <div class="hidden" id="results-container">
+            <h2>Path Results</h2>
+            <!-- <br /> -->
+            <p>Visits: <span id="visits"></span></p>
+            <br />
+            <p>Path Length: <span id="path-size"></span></p>
+          </div>
         </div>
       </div>
     </div>
+
+    <script>
+      function toggleSideBar() {
+        const sidebar = document.querySelector(".sidebar");
+        const sidebarToggler = document.querySelector(".sidebar-toggler");
+        const sidebarContent = document.querySelector(".sidebar-content");
+        const sidebarTogglerIcon = document.querySelector(
+          ".sidebar-toggler ion-icon"
+        );
+
+        if (sidebar.classList.contains("closed")) {
+          sidebar.classList.remove("closed");
+          sidebarTogglerIcon.setAttribute("name", "chevron-back-circle-sharp");
+        } else {
+          sidebar.classList.add("closed");
+          sidebarTogglerIcon.setAttribute(
+            "name",
+            "chevron-forward-circle-sharp"
+          );
+        }
+      }
+
+      function toggleAlgorithmsList(toggler) {
+        const algorithms = document.querySelector(".algorithms");
+
+        if (algorithms.classList.contains("minimized")) {
+          algorithms.classList.remove("minimized");
+          toggler.setAttribute("name", "chevron-up-outline");
+        } else {
+          algorithms.classList.add("minimized");
+          toggler.setAttribute("name", "chevron-down-outline");
+        }
+      }
+    </script>
   </body>
 </html>
