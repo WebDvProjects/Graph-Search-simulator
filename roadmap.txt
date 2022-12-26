@@ -9,7 +9,7 @@ trigger so often that sometimes it unselects the walls immediately
 
 
 TODO:
-/Improve UI and Fonts:
+//Improve UI and Fonts:
     - clicking on algorithm dropdown
 Add Key
 ///user pick start and end positions by clicking on grid
