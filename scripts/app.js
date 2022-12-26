@@ -499,7 +499,7 @@ const GridSetup = (function () {
 })();
 
 const Search = (() => {
-  const resultsContainer = document.querySelector("#results-container");
+  const resultsContainer = document.querySelector("#summary-container");
   const visitsDisplay = document.querySelector("#visits");
   const pathSizeDisplay = document.querySelector("#path-size");
   let delay = 50;

@@ -3,7 +3,7 @@ On mobile the dragging/drawing effect for the walls can get a bit buggy cz the t
 trigger so often that sometimes it unselects the walls immediately
 
 TODO:
-Improve UI
+/Improve UI
 Add Key
 ///user pick start and end positions by clicking on grid
 /Add other algorithms or variants (Traditional Iteration, Djikstra's shortest path)
@@ -27,7 +27,7 @@ stop user form selecting start and end nodes when the animation is running unles
 
 fixed-grid size
 
-
+change marking operations to use ids instead of classes (classes conflict)
 
 BFS
 

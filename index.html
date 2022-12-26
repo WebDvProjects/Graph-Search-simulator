@@ -174,12 +174,44 @@
           <div class="grid"></div>
           <!-- </div> -->
 
-          <div class="" id="results-container">
-            <h2>Summary</h2>
-            <!-- <br /> -->
-            <p>Visits: <span id="visits"></span></p>
-            <br />
-            <p>Path Length: <span id="path-size"></span></p>
+          <div class="" id="summary-container">
+            <div class="summary">
+              <h2>Summary</h2>
+              <!-- <br /> -->
+              <p>Visits: <span id="visits"></span></p>
+              <br />
+              <p>Path Length: <span id="path-size"></span></p>
+            </div>
+
+            <div class="key-wrapper">
+              <legend>KEY</legend>
+              <div class="key">
+                <div class="key-item">
+                  <div class="key-item-color start-color"></div>
+                  <p>Start</p>
+                </div>
+                <div class="key-item">
+                  <div class="key-item-color target-color"></div>
+                  <p>Target</p>
+                </div>
+                <div class="key-item">
+                  <div class="key-item-color visited-color"></div>
+                  <p>Visited</p>
+                </div>
+                <div class="key-item">
+                  <div class="key-item-color frontier-color"></div>
+                  <p>Frontier</p>
+                </div>
+                <div class="key-item">
+                  <div class="key-item-color path-color"></div>
+                  <p>Path</p>
+                </div>
+                <div class="key-item">
+                  <div class="key-item-color wall-color"></div>
+                  <p>Wall</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
