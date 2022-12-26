@@ -2,8 +2,15 @@ BUGS:
 On mobile the dragging/drawing effect for the walls can get a bit buggy cz the touchmove events
 trigger so often that sometimes it unselects the walls immediately
 
+[IMPORTANT]optimize setting grid:
+    - add a button to click to actually update the grid (real-time uses so much memory)
+    - make grid square-sized and fixed
+    - add event listeners to parents rather than individual cells when creating the cells
+
+
 TODO:
-Improve UI
+/Improve UI and Fonts:
+    - clicking on algorithm dropdown
 Add Key
 ///user pick start and end positions by clicking on grid
 /Add other algorithms or variants (Traditional Iteration, Djikstra's shortest path)
@@ -27,6 +34,9 @@ stop user form selecting start and end nodes when the animation is running unles
 
 fixed-grid size
 
+change marking operations to use ids instead of classes (classes conflict)
+
+random maze generator
 
 
 BFS
