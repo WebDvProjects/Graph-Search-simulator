@@ -40,7 +40,8 @@ const FormControl = (() => {
   const targetRow = document.querySelector("#target-row");
 
   /* EVENT LISTENERS */
-  [rowsInput, colsInput].forEach((input) => {
+
+  for (const input of [rowsInput, colsInput]) {
     input.addEventListener("input", () => {
       // update rows and cols values
       rows = rowsInput.value;
@@ -62,23 +63,28 @@ const FormControl = (() => {
       // update grid
       GridSetup.updateGrid(cols, rows);
     });
-  });
+  }
 
-  [rowsInput, colsInput, startCol, startRow, targetCol, targetRow].forEach(
-    (input) => {
-      input.addEventListener("input", () => {
-        // real-time validation
-        if (
-          !customValidation(
-            input,
-            `${input.name} must be a number between ${input.min} and ${input.max}`
-          )
-        ) {
-          return;
-        }
-      });
-    }
-  );
+  for (const input of [
+    rowsInput,
+    colsInput,
+    startCol,
+    startRow,
+    targetCol,
+    targetRow,
+  ]) {
+    input.addEventListener("input", () => {
+      // real-time validation
+      if (
+        !customValidation(
+          input,
+          `${input.name} must be a number between ${input.min} and ${input.max}`
+        )
+      ) {
+        return;
+      }
+    });
+  }
 
   form.onsubmit = function (e) {
     e.preventDefault();
@@ -210,7 +216,11 @@ const GridSetup = (() => {
       */
       cell.addEventListener("click", (e) => {
         // if we are drawing walls then don't allow to select start and end nodes
-        if (toggleDrawing.classList.contains("active")) return;
+        if (
+          toggleDrawing.classList.contains("active") ||
+          cell.classList.contains("wall")
+        )
+          return;
 
         // set cell as start when touch
         // can unselect by clicking again
@@ -248,7 +258,11 @@ const GridSetup = (() => {
       */
       cell.addEventListener("touchend", (e) => {
         // if we are drawing walls then don't allow to select start and end nodes
-        if (toggleDrawing.classList.contains("active")) return;
+        if (
+          toggleDrawing.classList.contains("active") ||
+          cell.classList.contains("wall")
+        )
+          return;
 
         // set cell as start when touch
         // can unselect by clicking again
@@ -281,6 +295,13 @@ const GridSetup = (() => {
 
       // add an event listener to allow users to draw walls
       cell.addEventListener("mousedown", (e) => {
+        // don't draw walls on start and target nodes
+        if (
+          cell.classList.contains("start") ||
+          cell.classList.contains("target")
+        )
+          return;
+
         if (toggleDrawing.classList.contains("active")) {
           // toggle wall class
           cell.classList.toggle("wall");
@@ -290,6 +311,12 @@ const GridSetup = (() => {
 
       // When user is holding the mouse then allow drawing
       cell.addEventListener("mouseenter", (e) => {
+        // don't draw walls on start and target nodes
+        if (
+          cell.classList.contains("start") ||
+          cell.classList.contains("target")
+        )
+          return;
         if (toggleDrawing.classList.contains("active") && drawing) {
           // toggle wall class
           cell.classList.toggle("wall");
@@ -299,6 +326,12 @@ const GridSetup = (() => {
       // Event to allow users to draw walls on mobile browser
       cell.addEventListener("touchstart", (e) => {
         e.preventDefault();
+        // don't draw walls on start and target nodes
+        if (
+          cell.classList.contains("start") ||
+          cell.classList.contains("target")
+        )
+          return;
         if (toggleDrawing.classList.contains("active")) {
           // toggle wall class
           cell.classList.toggle("wall");
@@ -309,6 +342,13 @@ const GridSetup = (() => {
       // Event to simulate dragging/drawing on mobile browser
       cell.addEventListener("touchmove", (e) => {
         e.preventDefault();
+        // don't draw walls on start and target nodes
+        if (
+          cell.classList.contains("start") ||
+          cell.classList.contains("target")
+        )
+          return;
+
         // get the touch element and current touch position
         // ! NOTE: the target will always be the point where touchmove started
         const touch = e.targetTouches[0];
@@ -384,16 +424,16 @@ const GridSetup = (() => {
     enableDrawingControlBtns();
 
     const cells = document.querySelectorAll(".cell");
-    cells.forEach((cell) => {
+    for (const cell of cells) {
       cell.classList.remove("start", "target", "visited", "path", "frontier");
-    });
+    }
   };
 
   const clearWalls = () => {
     const cells = document.querySelectorAll(".cell");
-    cells.forEach((cell) => {
+    for (const cell of cells) {
       cell.classList.remove("wall");
-    });
+    }
   };
 
   return { createGrid, updateGrid, markCell, clearGrid, clearWalls };
@@ -522,9 +562,9 @@ const Search = (() => {
         // mark path
         timeOutExecutionIds.add(
           setTimeout(() => {
-            path.forEach((node) => {
+            for (const node of path) {
               GridSetup.markCell(node[0], node[1], "path");
-            });
+            }
           }, speed * iterationCounter())
         );
 
@@ -598,9 +638,9 @@ const Search = (() => {
         // mark path
         timeOutExecutionIds.add(
           setTimeout(() => {
-            path.forEach((node) => {
+            for (const node of path) {
               GridSetup.markCell(node[0], node[1], "path");
-            });
+            }
           }, bfsCounter() * speed)
         );
         // console.log(path, visited);
@@ -687,9 +727,9 @@ const Search = (() => {
         // mark path
         timeOutExecutionIds.add(
           setTimeout(() => {
-            path.forEach((node) => {
+            for (const node of path) {
               GridSetup.markCell(node[0], node[1], "path");
-            });
+            }
           }, dfsCounter() * speed)
         );
 
@@ -777,9 +817,9 @@ const Search = (() => {
         // mark path
         timeOutExecutionIds.add(
           setTimeout(() => {
-            path.forEach((node) => {
+            for (const node of path) {
               GridSetup.markCell(node[0], node[1], "path");
-            });
+            }
           }, dijkstraCounter() * speed)
         );
 
@@ -881,9 +921,9 @@ const Search = (() => {
         // mark path
         timeOutExecutionIds.add(
           setTimeout(() => {
-            path.forEach((node) => {
+            for (const node of path) {
               GridSetup.markCell(node[0], node[1], "path");
-            });
+            }
           }, aStarCounter() * speed)
         );
 
@@ -1036,15 +1076,15 @@ const DataStructures = (() => {
 })();
 
 function disableDrawingControlBtns() {
-  [toggleDrawing, clearWallsBtn].forEach((btn) => {
+  for (const btn of [toggleDrawing, clearWallsBtn]) {
     btn.disabled = true;
-  });
+  }
 }
 
 function enableDrawingControlBtns() {
-  [toggleDrawing, clearWallsBtn].forEach((btn) => {
+  for (const btn of [toggleDrawing, clearWallsBtn]) {
     btn.disabled = false;
-  });
+  }
 }
 
 window.onload = () => {

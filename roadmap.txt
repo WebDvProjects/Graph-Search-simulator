@@ -1,4 +1,6 @@
-THINGS TO FIX:
+BUGS:
+On mobile the dragging/drawing effect for the walls can get a bit buggy cz the touchmove events
+trigger so often that sometimes it unselects the walls immediately
 
 TODO:
 Improve UI

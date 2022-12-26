@@ -311,6 +311,19 @@ legend {
     justify-self: end;
   }
 
+  /* .control-buttons {
+    flex-direction: row;
+    top: 0;
+  }
+
+  .control-buttons button {
+    height: 30px;
+    font-size: 0.5rem;
+    width: 110px;
+  } */
+}
+/* mobile adjustments */
+@media only screen and (max-width: 450px) and (min-width: 320px) {
   .control-buttons {
     flex-direction: row;
     top: 0;
